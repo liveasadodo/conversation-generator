@@ -5,7 +5,7 @@ An Android app that generates English conversation examples based on user-provid
 ## Features
 
 - Input situation scenarios
-- Auto-generate English conversations using Claude AI API
+- Auto-generate English conversations using Google AI Studio API (Gemini)
 - Copy and share generated conversations
 - Example situations for quick start
 
@@ -35,6 +35,6 @@ An Android app that generates English conversation examples based on user-provid
 ## Upcoming Features
 
 - Main UI implementation
-- Claude AI API integration
+- Google AI Studio API (Gemini) integration
 - Conversation history storage
 - Favorite conversations feature

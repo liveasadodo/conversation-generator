@@ -2,7 +2,7 @@
 
 ## Overview
 
-Conversation Generator is an Android application that generates English conversation examples based on user-provided situations using Claude AI API.
+Conversation Generator is an Android application that generates English conversation examples based on user-provided situations using Google AI Studio API (Gemini).
 
 ## Core Features
 
@@ -16,7 +16,7 @@ Conversation Generator is an Android application that generates English conversa
   - Checking in at a hotel
 
 ### 2. Conversation Generation
-- Generate natural English conversations using Claude AI API
+- Generate natural English conversations using Google AI Studio API (Gemini)
 - Conversations consist of 2-3 exchanges
 - Display generated conversation in readable format
 - Loading indicator during generation
@@ -30,44 +30,55 @@ Conversation Generator is an Android application that generates English conversa
 
 ### API Integration
 
-#### Claude API
-- **Endpoint**: `POST https://api.anthropic.com/v1/messages`
-- **Model**: `claude-3-5-sonnet-20241022` (recommended for production)
-- **Alternative**: `claude-3-5-haiku-20241022` (for development/testing)
-- **Max Tokens**: 1024
-- **API Version**: 2023-06-01
+#### Google AI Studio API (Gemini)
+- **Endpoint**: `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
+- **Model**: `gemini-1.5-flash` (recommended for production - fast and cost-effective)
+- **Alternative**: `gemini-1.5-pro` (for higher quality outputs)
+- **Max Tokens**: Configured via `generationConfig.maxOutputTokens`
+- **API Key**: Passed as query parameter `?key=YOUR_API_KEY`
 
 #### Request Format
 ```json
 {
-  "model": "claude-3-5-sonnet-20241022",
-  "max_tokens": 1024,
-  "messages": [
+  "contents": [
     {
-      "role": "user",
-      "content": "Please generate a natural English conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}"
+      "parts": [
+        {
+          "text": "Please generate a natural English conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}"
+        }
+      ]
     }
-  ]
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 1024,
+    "topP": 0.95,
+    "topK": 40
+  }
 }
 ```
 
 #### Response Format
 ```json
 {
-  "id": "msg_01XYZ...",
-  "type": "message",
-  "role": "assistant",
-  "content": [
+  "candidates": [
     {
-      "type": "text",
-      "text": "**Title**\n\nSpeaker A: ...\nSpeaker B: ..."
+      "content": {
+        "parts": [
+          {
+            "text": "**At a Restaurant - Ordering Food**\n\nWaiter: Good evening! Are you ready to order?\nCustomer: Yes, I'd like the grilled salmon, please.\n\nWaiter: Excellent choice! How would you like that cooked?\nCustomer: Medium, please. And could I have a side salad instead of fries?\n\nWaiter: Of course! Anything to drink?\nCustomer: Just water, thank you."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
     }
   ],
-  "model": "claude-3-5-sonnet-20241022",
-  "stop_reason": "end_turn",
-  "usage": {
-    "input_tokens": 45,
-    "output_tokens": 89
+  "usageMetadata": {
+    "promptTokenCount": 45,
+    "candidatesTokenCount": 89,
+    "totalTokenCount": 134
   }
 }
 ```
@@ -83,13 +94,13 @@ Conversation Generator is an Android application that generates English conversa
 1. **MainActivity**: Main UI screen
 2. **MainViewModel**: Handles business logic and API calls
 3. **ConversationRepository**: Manages data operations
-4. **ClaudeApiService**: Retrofit interface for API communication
+4. **GeminiApiService**: Retrofit interface for API communication
 
 #### Data Flow
 ```
-User Input → ViewModel → Repository → API Service → Claude API
+User Input → ViewModel → Repository → API Service → Gemini API
                 ↓                                        ↓
-            LiveData ← Repository ← Response ← Claude API
+            LiveData ← Repository ← Response ← Gemini API
                 ↓
               View
 ```
@@ -106,40 +117,51 @@ data class ConversationRequest(
 )
 ```
 
-#### ClaudeApiRequest
+#### GeminiApiRequest
 ```kotlin
-data class ClaudeApiRequest(
-    val model: String,
-    val max_tokens: Int,
-    val messages: List<Message>
-)
-
-data class Message(
-    val role: String,
-    val content: String
-)
-```
-
-#### ClaudeApiResponse
-```kotlin
-data class ClaudeApiResponse(
-    val id: String,
-    val type: String,
-    val role: String,
-    val content: List<Content>,
-    val model: String,
-    val stop_reason: String,
-    val usage: Usage
+data class GeminiApiRequest(
+    val contents: List<Content>,
+    val generationConfig: GenerationConfig? = null
 )
 
 data class Content(
-    val type: String,
+    val parts: List<Part>
+)
+
+data class Part(
     val text: String
 )
 
-data class Usage(
-    val input_tokens: Int,
-    val output_tokens: Int
+data class GenerationConfig(
+    val temperature: Double = 0.7,
+    val maxOutputTokens: Int = 1024,
+    val topP: Double = 0.95,
+    val topK: Int = 40
+)
+```
+
+#### GeminiApiResponse
+```kotlin
+data class GeminiApiResponse(
+    val candidates: List<Candidate>,
+    val usageMetadata: UsageMetadata?
+)
+
+data class Candidate(
+    val content: ResponseContent,
+    val finishReason: String,
+    val index: Int
+)
+
+data class ResponseContent(
+    val parts: List<Part>,
+    val role: String
+)
+
+data class UsageMetadata(
+    val promptTokenCount: Int,
+    val candidatesTokenCount: Int,
+    val totalTokenCount: Int
 )
 ```
 
@@ -152,7 +174,7 @@ data class Usage(
 - User must input API key on first launch or in settings
 
 #### Network Security
-- Use HTTPS only (enforced by Claude API)
+- Use HTTPS only (enforced by Google AI API)
 - Validate SSL certificates
 - Consider certificate pinning for production
 
@@ -259,8 +281,8 @@ data class Usage(
 - API 34 (Android 14)
 
 ### Build Variants
-- Debug: Uses Haiku model for cost efficiency
-- Release: Uses Sonnet model for quality
+- Debug: Uses gemini-1.5-flash for cost efficiency
+- Release: Uses gemini-1.5-flash for production (or gemini-1.5-pro for higher quality)
 
 ### ProGuard
 - Enable minification for release builds
@@ -269,15 +291,17 @@ data class Usage(
 
 ## Cost Estimation
 
-### Claude API Pricing
-- Input: $3.00 / 1M tokens (Sonnet)
-- Output: $15.00 / 1M tokens (Sonnet)
+### Google AI Studio Pricing (Free Tier)
+- **Free tier**: 15 requests per minute (RPM), 1 million tokens per minute (TPM), 1,500 requests per day (RPD)
+- **Gemini 1.5 Flash**: Free for up to rate limits
+- **Gemini 1.5 Pro**: Free for up to rate limits
 
 ### Per Conversation
 - Average input: 100 tokens
 - Average output: 150 tokens
-- Cost per generation: ~$0.00003
+- Cost per generation: **FREE** (within rate limits)
 
 ### Monthly Budget (Example)
-- 1000 users × 10 generations/month = 10,000 generations
-- Estimated cost: ~$0.30/month
+- Up to 1,500 requests/day = 45,000 requests/month
+- Estimated cost: **$0** (free tier)
+- Note: For higher usage, consider paid tier or rate limiting strategies
