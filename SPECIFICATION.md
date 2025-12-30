@@ -1,0 +1,283 @@
+# Application Specification
+
+## Overview
+
+Conversation Generator is an Android application that generates English conversation examples based on user-provided situations using Claude AI API.
+
+## Core Features
+
+### 1. Situation Input
+- Users can input any situation or scenario in text format
+- Input validation (max 500 characters recommended)
+- Clear button to reset input field
+- Example situations for quick start:
+  - Ordering at a restaurant
+  - Asking for directions
+  - Checking in at a hotel
+
+### 2. Conversation Generation
+- Generate natural English conversations using Claude AI API
+- Conversations consist of 2-3 exchanges
+- Display generated conversation in readable format
+- Loading indicator during generation
+
+### 3. Output Management
+- Copy generated conversation to clipboard
+- Share conversation via Android share menu
+- Display success/error messages appropriately
+
+## Technical Specifications
+
+### API Integration
+
+#### Claude API
+- **Endpoint**: `POST https://api.anthropic.com/v1/messages`
+- **Model**: `claude-3-5-sonnet-20241022` (recommended for production)
+- **Alternative**: `claude-3-5-haiku-20241022` (for development/testing)
+- **Max Tokens**: 1024
+- **API Version**: 2023-06-01
+
+#### Request Format
+```json
+{
+  "model": "claude-3-5-sonnet-20241022",
+  "max_tokens": 1024,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Please generate a natural English conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}"
+    }
+  ]
+}
+```
+
+#### Response Format
+```json
+{
+  "id": "msg_01XYZ...",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "**Title**\n\nSpeaker A: ...\nSpeaker B: ..."
+    }
+  ],
+  "model": "claude-3-5-sonnet-20241022",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 45,
+    "output_tokens": 89
+  }
+}
+```
+
+### Architecture
+
+#### MVVM Pattern
+- **Model**: Data classes for API requests/responses
+- **View**: Activities and XML layouts
+- **ViewModel**: Business logic and state management
+
+#### Components
+1. **MainActivity**: Main UI screen
+2. **MainViewModel**: Handles business logic and API calls
+3. **ConversationRepository**: Manages data operations
+4. **ClaudeApiService**: Retrofit interface for API communication
+
+#### Data Flow
+```
+User Input → ViewModel → Repository → API Service → Claude API
+                ↓                                        ↓
+            LiveData ← Repository ← Response ← Claude API
+                ↓
+              View
+```
+
+### Data Models
+
+#### ConversationRequest
+```kotlin
+data class ConversationRequest(
+    val situation: String,
+    val difficulty: String = "intermediate", // beginner, intermediate, advanced
+    val length: String = "medium", // short (1-2 turns), medium (2-3 turns), long (4-5 turns)
+    val includeTranslation: Boolean = false
+)
+```
+
+#### ClaudeApiRequest
+```kotlin
+data class ClaudeApiRequest(
+    val model: String,
+    val max_tokens: Int,
+    val messages: List<Message>
+)
+
+data class Message(
+    val role: String,
+    val content: String
+)
+```
+
+#### ClaudeApiResponse
+```kotlin
+data class ClaudeApiResponse(
+    val id: String,
+    val type: String,
+    val role: String,
+    val content: List<Content>,
+    val model: String,
+    val stop_reason: String,
+    val usage: Usage
+)
+
+data class Content(
+    val type: String,
+    val text: String
+)
+
+data class Usage(
+    val input_tokens: Int,
+    val output_tokens: Int
+)
+```
+
+### Security Requirements
+
+#### API Key Management
+- Store API key in SharedPreferences (encrypted)
+- Never hardcode API keys in source code
+- Exclude API keys from version control
+- User must input API key on first launch or in settings
+
+#### Network Security
+- Use HTTPS only (enforced by Claude API)
+- Validate SSL certificates
+- Consider certificate pinning for production
+
+#### Input Validation
+- Maximum input length: 500 characters
+- Filter potentially inappropriate content
+- Sanitize user input before API calls
+
+### Error Handling
+
+#### Error Types
+| Error Code | Description | User Message | Action |
+|-----------|-------------|--------------|--------|
+| 400 | Invalid request | "Invalid input format" | Show error, allow retry |
+| 401 | Authentication error | "API key is invalid" | Prompt to check API key |
+| 429 | Rate limit exceeded | "Too many requests. Please wait." | Implement exponential backoff |
+| 500 | Server error | "Service unavailable. Please try again." | Retry with backoff |
+| Network | No internet connection | "Network error occurred" | Check connection, allow retry |
+
+#### Retry Strategy
+- Maximum 3 retry attempts
+- Exponential backoff: 2s, 4s, 8s
+- User notification on final failure
+
+### Performance Requirements
+
+#### Response Time
+- API call timeout: 30 seconds
+- UI responsiveness: < 100ms for user interactions
+- Loading indicator shown for operations > 500ms
+
+#### Resource Usage
+- Memory: Efficient handling of API responses
+- Network: Minimize unnecessary API calls
+- Battery: Use Coroutines for background operations
+
+### UI/UX Specifications
+
+#### Main Screen Layout
+1. **Header**: App title
+2. **Input Section**:
+   - Multi-line EditText for situation input
+   - Character counter (optional)
+   - Example chips/buttons for quick input
+3. **Action Buttons**:
+   - Generate button (primary action)
+   - Clear button (secondary action)
+4. **Result Section**:
+   - ScrollView for generated conversation
+   - Copy and Share buttons
+5. **Loading State**: Progress indicator overlay
+
+#### States
+- **Initial**: Empty input, generate button enabled
+- **Loading**: Progress indicator, generate button disabled
+- **Success**: Display result, show copy/share buttons
+- **Error**: Show error message, allow retry
+
+#### Theme
+- Material Design 3
+- Primary color: Blue (#2196F3)
+- Accent color: Green (#4CAF50)
+- Support light mode (dark mode optional for future)
+
+### Future Enhancements
+
+#### Phase 2
+- Conversation history storage (local database)
+- Favorite conversations feature
+- Multiple difficulty levels
+- Conversation length options
+
+#### Phase 3
+- Japanese translation toggle
+- Audio playback of conversations (TTS)
+- Offline mode with cached conversations
+- User accounts and cloud sync
+
+## Testing Requirements
+
+### Unit Tests
+- ViewModel logic
+- Repository operations
+- Data model validation
+- Input sanitization
+
+### Integration Tests
+- API communication
+- Error handling flows
+- Retry mechanism
+
+### UI Tests
+- User input scenarios
+- Button interactions
+- State transitions
+- Error message display
+
+## Deployment
+
+### Minimum SDK
+- API 24 (Android 7.0)
+
+### Target SDK
+- API 34 (Android 14)
+
+### Build Variants
+- Debug: Uses Haiku model for cost efficiency
+- Release: Uses Sonnet model for quality
+
+### ProGuard
+- Enable minification for release builds
+- Keep Retrofit and Gson classes
+- Obfuscate business logic
+
+## Cost Estimation
+
+### Claude API Pricing
+- Input: $3.00 / 1M tokens (Sonnet)
+- Output: $15.00 / 1M tokens (Sonnet)
+
+### Per Conversation
+- Average input: 100 tokens
+- Average output: 150 tokens
+- Cost per generation: ~$0.00003
+
+### Monthly Budget (Example)
+- 1000 users × 10 generations/month = 10,000 generations
+- Estimated cost: ~$0.30/month
