@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Conversation Generator</string>
+
+    <!-- Main Screen -->
+    <string name="title_main">Conversation Generator</string>
+    <string name="hint_situation">Enter a situation…</string>
+    <string name="button_generate">Generate</string>
+    <string name="button_clear">Clear</string>
+
+    <!-- Result -->
+    <string name="title_result">Generated Conversation</string>
+    <string name="button_copy">Copy</string>
+    <string name="button_share">Share</string>
+
+    <!-- Messages -->
+    <string name="error_empty_situation">Please enter a situation</string>
+    <string name="error_network">Network error occurred</string>
+    <string name="error_generation">Failed to generate conversation</string>
+    <string name="message_copied">Copied to clipboard</string>
+    <string name="loading">Generating…</string>
+
+    <!-- Examples -->
+    <string name="example_title">Examples:</string>
+    <string name="example_1">Ordering at a restaurant</string>
+    <string name="example_2">Asking for directions</string>
+    <string name="example_3">Checking in at a hotel</string>
+</resources>
