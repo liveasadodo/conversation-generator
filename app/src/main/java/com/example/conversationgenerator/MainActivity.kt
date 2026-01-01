@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private var generatedConversation: String = ""
     private var parsedConversation: com.example.conversationgenerator.util.ParsedConversation? = null
     private var currentSituation: String = ""
+    private var currentKeySentence: String? = null
 
     companion object {
         private const val PREFS_NAME = "api_keys"
@@ -171,8 +172,10 @@ class MainActivity : AppCompatActivity() {
         // Generate button
         binding.generateButton.setOnClickListener {
             val situation = binding.situationEditText.text.toString()
+            val keySentence = binding.keySentenceEditText.text.toString().trim()
             currentSituation = situation
-            viewModel.generateConversation(situation)
+            currentKeySentence = keySentence.ifBlank { null }
+            viewModel.generateConversation(situation, currentKeySentence)
         }
 
         // History button
@@ -184,6 +187,7 @@ class MainActivity : AppCompatActivity() {
         // Clear button
         binding.clearButton.setOnClickListener {
             binding.situationEditText.text?.clear()
+            binding.keySentenceEditText.text?.clear()
             binding.resultCard.visibility = View.GONE
             viewModel.clearConversation()
         }
@@ -414,6 +418,7 @@ class MainActivity : AppCompatActivity() {
             historyRepository.saveConversation(
                 title = title,
                 situation = currentSituation,
+                keySentence = currentKeySentence,
                 conversationText = conversationText,
                 generationLanguage = genLang,
                 interfaceLanguage = intLang

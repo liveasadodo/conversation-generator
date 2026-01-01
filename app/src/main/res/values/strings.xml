@@ -7,6 +7,9 @@
     <string name="label_generation_language">Generation Language</string>
     <string name="label_interface_language">Interface Language (for translation)</string>
     <string name="hint_situation">Enter a situation…</string>
+    <string name="label_key_sentence">Key Sentence (Optional)</string>
+    <string name="hint_key_sentence">Enter a sentence to include in the conversation…</string>
+    <string name="help_key_sentence">The AI will generate a conversation that naturally includes this sentence</string>
     <string name="button_generate">Generate</string>
     <string name="button_clear">Clear</string>
 

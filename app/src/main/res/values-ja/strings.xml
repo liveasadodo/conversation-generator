@@ -7,6 +7,9 @@
     <string name="label_generation_language">生成言語</string>
     <string name="label_interface_language">利用言語（翻訳用）</string>
     <string name="hint_situation">状況を入力してください…</string>
+    <string name="label_key_sentence">キーセンテンス（任意）</string>
+    <string name="hint_key_sentence">会話に含めたい文を入力してください…</string>
+    <string name="help_key_sentence">この文を自然に含む会話をAIが生成します</string>
     <string name="button_generate">生成</string>
     <string name="button_clear">クリア</string>
 

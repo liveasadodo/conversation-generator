@@ -145,6 +145,28 @@
                     android:inputType="textMultiLine|textCapSentences" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Key Sentence Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/keySentenceInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/hint_key_sentence"
+                app:boxBackgroundMode="outline"
+                app:helperText="@string/help_key_sentence"
+                app:helperTextEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/keySentenceEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:maxLines="2"
+                    android:maxLength="200"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Example Situations -->
             <TextView
                 android:id="@+id/examplesLabel"

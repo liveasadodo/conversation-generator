@@ -6,52 +6,104 @@ object PromptTemplates {
     fun generateConversationPrompt(
         situation: String,
         generationLanguage: Language = Language.ENGLISH,
-        interfaceLanguage: Language? = null
+        interfaceLanguage: Language? = null,
+        keySentence: String? = null
     ): String {
         val languageName = generationLanguage.displayName
         val includeTranslation = interfaceLanguage != null && interfaceLanguage != generationLanguage
+        val hasKeySentence = !keySentence.isNullOrBlank()
 
-        return if (includeTranslation) {
-            """
-                Please generate a natural $languageName conversation suitable for the following situation.
+        return when {
+            includeTranslation && hasKeySentence -> {
+                """
+                    Please generate a natural $languageName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence.
 
-                Requirements:
-                - Conversation should consist of 2-3 exchanges
-                - Use practical and natural expressions
-                - Clearly distinguish each speaker's dialogue
-                - Include appropriate greetings and closing
+                    Requirements:
+                    - Conversation should consist of 2-3 exchanges
+                    - Use practical and natural expressions
+                    - Clearly distinguish each speaker's dialogue
+                    - Include appropriate greetings and closing
+                    - IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues
 
-                Situation: $situation
+                    Situation: $situation
+                    Key Sentence: $keySentence
 
-                Format (IMPORTANT - Follow this exact format):
-                **Title**
+                    Format (IMPORTANT - Follow this exact format):
+                    **Title**
 
-                Speaker A: [original $languageName sentence]
-                [TRANSLATION]: [${interfaceLanguage!!.displayName} translation]
+                    Speaker A: [original $languageName sentence]
+                    [TRANSLATION]: [${interfaceLanguage!!.displayName} translation]
 
-                Speaker B: [original $languageName sentence]
-                [TRANSLATION]: [${interfaceLanguage.displayName} translation]
+                    Speaker B: [original $languageName sentence]
+                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
 
-                CRITICAL: Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation.
-            """.trimIndent()
-        } else {
-            """
-                Please generate a natural $languageName conversation suitable for the following situation.
+                    CRITICAL: Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation.
+                """.trimIndent()
+            }
+            includeTranslation -> {
+                """
+                    Please generate a natural $languageName conversation suitable for the following situation.
 
-                Requirements:
-                - Conversation should consist of 2-3 exchanges
-                - Use practical and natural expressions
-                - Clearly distinguish each speaker's dialogue
-                - Include appropriate greetings and closing
+                    Requirements:
+                    - Conversation should consist of 2-3 exchanges
+                    - Use practical and natural expressions
+                    - Clearly distinguish each speaker's dialogue
+                    - Include appropriate greetings and closing
 
-                Situation: $situation
+                    Situation: $situation
 
-                Format:
-                **Title**
+                    Format (IMPORTANT - Follow this exact format):
+                    **Title**
 
-                Speaker A: ...
-                Speaker B: ...
-            """.trimIndent()
+                    Speaker A: [original $languageName sentence]
+                    [TRANSLATION]: [${interfaceLanguage!!.displayName} translation]
+
+                    Speaker B: [original $languageName sentence]
+                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
+
+                    CRITICAL: Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation.
+                """.trimIndent()
+            }
+            hasKeySentence -> {
+                """
+                    Please generate a natural $languageName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence.
+
+                    Requirements:
+                    - Conversation should consist of 2-3 exchanges
+                    - Use practical and natural expressions
+                    - Clearly distinguish each speaker's dialogue
+                    - Include appropriate greetings and closing
+                    - IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues
+
+                    Situation: $situation
+                    Key Sentence: $keySentence
+
+                    Format:
+                    **Title**
+
+                    Speaker A: ...
+                    Speaker B: ...
+                """.trimIndent()
+            }
+            else -> {
+                """
+                    Please generate a natural $languageName conversation suitable for the following situation.
+
+                    Requirements:
+                    - Conversation should consist of 2-3 exchanges
+                    - Use practical and natural expressions
+                    - Clearly distinguish each speaker's dialogue
+                    - Include appropriate greetings and closing
+
+                    Situation: $situation
+
+                    Format:
+                    **Title**
+
+                    Speaker A: ...
+                    Speaker B: ...
+                """.trimIndent()
+            }
         }
     }
 

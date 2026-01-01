@@ -27,6 +27,7 @@ class ConversationRepository(
 
     suspend fun generateConversation(
         situation: String,
+        keySentence: String? = null,
         generationLanguage: Language = Language.ENGLISH,
         interfaceLanguage: Language? = null,
         difficulty: String = "intermediate",
@@ -47,7 +48,7 @@ class ConversationRepository(
                 val prompt = when {
                     difficulty != "intermediate" -> PromptTemplates.generateWithDifficulty(situation, difficulty)
                     length != "medium" -> PromptTemplates.generateWithLength(situation, length)
-                    else -> PromptTemplates.generateConversationPrompt(situation, generationLanguage, interfaceLanguage)
+                    else -> PromptTemplates.generateConversationPrompt(situation, generationLanguage, interfaceLanguage, keySentence)
                 }
 
                 // Adjust max tokens based on whether translation is included

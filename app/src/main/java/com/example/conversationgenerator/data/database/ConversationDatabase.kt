@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ConversationEntity::class], version = 1, exportSchema = false)
+@Database(entities = [ConversationEntity::class], version = 2, exportSchema = false)
 abstract class ConversationDatabase : RoomDatabase() {
     abstract fun conversationDao(): ConversationDao
 
@@ -19,7 +19,9 @@ abstract class ConversationDatabase : RoomDatabase() {
                     context.applicationContext,
                     ConversationDatabase::class.java,
                     "conversation_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration() // Since this is a local app, we can recreate DB on schema change
+                    .build()
                 INSTANCE = instance
                 instance
             }

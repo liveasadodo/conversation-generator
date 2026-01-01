@@ -9,6 +9,7 @@ data class ConversationEntity(
     val id: Long = 0,
     val title: String,
     val situation: String,
+    val keySentence: String?,
     val conversationText: String,
     val generationLanguage: String,
     val interfaceLanguage: String?,

@@ -21,6 +21,7 @@ class ConversationHistoryRepository(
     suspend fun saveConversation(
         title: String,
         situation: String,
+        keySentence: String?,
         conversationText: String,
         generationLanguage: String,
         interfaceLanguage: String?
@@ -29,6 +30,7 @@ class ConversationHistoryRepository(
             val conversation = ConversationEntity(
                 title = title,
                 situation = situation,
+                keySentence = keySentence,
                 conversationText = conversationText,
                 generationLanguage = generationLanguage,
                 interfaceLanguage = interfaceLanguage

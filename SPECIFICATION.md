@@ -15,6 +15,16 @@ Conversation Generator is an Android application that generates multilingual con
   - Asking for directions
   - Checking in at a hotel
 
+#### Key Sentence (Optional)
+- Users can optionally specify a key sentence that must be included in the generated conversation
+- When provided, the AI will generate a conversation that naturally incorporates the specified sentence
+- Key sentence validation (max 200 characters recommended)
+- Use cases:
+  - Practicing specific phrases or expressions
+  - Learning particular grammar patterns in context
+  - Ensuring conversations cover specific vocabulary
+- The key sentence will appear naturally within one of the speaker's dialogues
+
 ### 2. Language Selection
 - **Generation Language**: Select the language for generating conversations
   - Supported languages: English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
@@ -72,6 +82,27 @@ Conversation Generator is an Android application that generates multilingual con
 }
 ```
 
+**Generation with Key Sentence**
+```json
+{
+  "contents": [
+    {
+      "parts": [
+        {
+          "text": "Please generate a natural {generation_language} conversation suitable for the following situation. The conversation should consist of 2-3 exchanges and MUST naturally include the following key sentence.\n\nSituation: {user_input}\nKey Sentence: {key_sentence}\n\nIMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues. Adjust the conversation flow to make the key sentence fit naturally.\n\nFormat:\n**Title**\n\nSpeaker A: ...\nSpeaker B: ..."
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 1024,
+    "topP": 0.95,
+    "topK": 40
+  }
+}
+```
+
 **Generation with Translation**
 ```json
 {
@@ -80,6 +111,27 @@ Conversation Generator is an Android application that generates multilingual con
       "parts": [
         {
           "text": "Please generate a natural {generation_language} conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}\n\nFormat:\n**Title**\n\nSpeaker A: ...\n({interface_language} translation: ...)\nSpeaker B: ...\n({interface_language} translation: ...)\n\nProvide the conversation in {generation_language} with {interface_language} translations in parentheses after each line."
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 2048,
+    "topP": 0.95,
+    "topK": 40
+  }
+}
+```
+
+**Generation with Translation and Key Sentence**
+```json
+{
+  "contents": [
+    {
+      "parts": [
+        {
+          "text": "Please generate a natural {generation_language} conversation suitable for the following situation. The conversation should consist of 2-3 exchanges and MUST naturally include the following key sentence.\n\nSituation: {user_input}\nKey Sentence: {key_sentence}\n\nIMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues. Adjust the conversation flow to make the key sentence fit naturally.\n\nFormat:\n**Title**\n\nSpeaker A: ...\n[TRANSLATION]: ...\nSpeaker B: ...\n[TRANSLATION]: ...\n\nProvide the conversation in {generation_language} with {interface_language} translations marked with [TRANSLATION]."
         }
       ]
     }
@@ -146,6 +198,7 @@ User Input → ViewModel → Repository → API Service → Gemini API
 ```kotlin
 data class ConversationRequest(
     val situation: String,
+    val keySentence: String? = null, // Optional key sentence to include in conversation
     val generationLanguage: String = "English", // English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
     val interfaceLanguage: String = "English", // English, Japanese
     val includeTranslation: Boolean = false, // Auto-enable when generationLanguage != interfaceLanguage
@@ -265,7 +318,7 @@ data class UsageMetadata(
 ### UI/UX Specifications
 
 #### Main Screen Layout
-1. **Header**: App title
+1. **Header**: App title and history button
 2. **Language Selection Section**:
    - **Generation Language Spinner**: Dropdown to select conversation language
      - Options: English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
@@ -273,15 +326,20 @@ data class UsageMetadata(
      - Options: English, Japanese
    - **Translation Toggle**: Checkbox to show/hide translations (auto-enabled when languages differ)
 3. **Input Section**:
-   - Multi-line EditText for situation input
-   - Character counter (optional)
-   - Example chips/buttons for quick input
+   - **Situation Input**: Multi-line EditText for situation input
+     - Character counter (optional, max 500 chars)
+     - Example chips/buttons for quick input
+   - **Key Sentence Input** (Optional, collapsible):
+     - Single-line or multi-line EditText for key sentence
+     - Character counter (optional, max 200 chars)
+     - Help text explaining the feature
+     - Can be toggled visible/hidden
 4. **Action Buttons**:
    - Generate button (primary action)
    - Clear button (secondary action)
 5. **Result Section**:
    - ScrollView for generated conversation
-   - When translation enabled: Display both original and translation
+   - When translation enabled: Display both original and translation in two-column layout
    - Copy and Share buttons
 6. **Loading State**: Progress indicator overlay
 

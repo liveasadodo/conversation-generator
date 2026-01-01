@@ -37,6 +37,7 @@ class MainViewModel(
 
     fun generateConversation(
         situation: String,
+        keySentence: String? = null,
         difficulty: String = "intermediate",
         length: String = "medium"
     ) {
@@ -49,6 +50,7 @@ class MainViewModel(
                 viewModelScope.launch {
                     val result = repository.generateConversation(
                         situation = validationResult.input,
+                        keySentence = keySentence,
                         generationLanguage = _generationLanguage.value ?: Language.ENGLISH,
                         interfaceLanguage = _interfaceLanguage.value,
                         difficulty = difficulty,
