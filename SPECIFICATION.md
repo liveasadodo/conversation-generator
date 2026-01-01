@@ -48,6 +48,9 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Speaker button next to each dialogue line
 - Play/Stop toggle with visual feedback
 - Auto-stop when switching lines
+- Play all button to play entire conversation sequentially
+- Play all stops individual line playback
+- Visual feedback showing play/stop state
 - Supports all 8 generation languages
 - Offline capable (when language data installed)
 
@@ -207,7 +210,7 @@ data class ConversationEntity(
 5. Formality selection (spinner)
 6. Conversation length selection (SeekBar with display, 2-5 turns)
 7. Action buttons (Generate, Clear)
-8. Result display with speaker buttons
+8. Result display with speaker buttons and play all button
 9. Copy/Share buttons
 
 **History Screen:**
@@ -218,7 +221,7 @@ data class ConversationEntity(
 
 **Detail Screen:**
 1. Conversation title
-2. Dialogue lines with speaker buttons
+2. Dialogue lines with speaker buttons and play all button
 3. Copy/Share buttons
 
 **Theme:**

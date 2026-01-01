@@ -50,9 +50,11 @@
 
     <!-- Text-to-Speech -->
     <string name="button_speak">Play audio</string>
+    <string name="button_play_all">Play all</string>
     <string name="error_tts_not_available">Text-to-speech not available</string>
     <string name="error_tts_language_not_available">Language data not installed for %s</string>
     <string name="message_tts_initializing">Initializing text-to-speech…</string>
+    <string name="error_no_conversation">No conversation to play</string>
 
     <!-- Formality Levels -->
     <string name="formality_formal">Formal</string>

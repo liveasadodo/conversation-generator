@@ -50,9 +50,11 @@
 
     <!-- Text-to-Speech -->
     <string name="button_speak">音声再生</string>
+    <string name="button_play_all">全体を再生</string>
     <string name="error_tts_not_available">音声合成機能が利用できません</string>
     <string name="error_tts_language_not_available">%s の音声データがインストールされていません</string>
     <string name="message_tts_initializing">音声合成を初期化中…</string>
+    <string name="error_no_conversation">再生する会話がありません</string>
 
     <!-- Formality Levels -->
     <string name="formality_formal">フォーマル</string>

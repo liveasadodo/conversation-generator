@@ -154,6 +154,10 @@ class ConversationDetailActivity : AppCompatActivity() {
         binding.shareButton.setOnClickListener {
             shareConversation()
         }
+
+        binding.playAllButton.setOnClickListener {
+            handlePlayAllButtonClick()
+        }
     }
 
     private fun copyToClipboard() {
@@ -186,6 +190,12 @@ class ConversationDetailActivity : AppCompatActivity() {
     }
 
     private fun handleSpeakButtonClick(button: android.widget.ImageButton, text: String) {
+        // Stop play all if active
+        if (ttsManager.isPlayingAll()) {
+            ttsManager.stopPlayAll()
+            binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
+        }
+
         if (ttsManager.isSpeaking() && currentPlayingButton == button) {
             // Stop if already playing this line
             ttsManager.stop()
@@ -210,6 +220,50 @@ class ConversationDetailActivity : AppCompatActivity() {
                         currentPlayingButton = null
                     }
                 }, 100)
+            } else {
+                Toast.makeText(
+                    this,
+                    getString(R.string.error_tts_language_not_available, generationLanguage.displayName),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun handlePlayAllButtonClick() {
+        if (ttsManager.isPlayingAll()) {
+            // Stop play all
+            ttsManager.stopPlayAll()
+            binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
+        } else {
+            // Stop any individual line playback
+            if (currentPlayingButton != null) {
+                currentPlayingButton?.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+                currentPlayingButton = null
+                ttsManager.stop()
+            }
+
+            // Get all texts from parsed conversation
+            val texts = parsedConversation?.lines?.map { it.originalText } ?: emptyList()
+
+            if (texts.isEmpty()) {
+                Toast.makeText(this, R.string.error_no_conversation, Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Start play all
+            val success = ttsManager.playAll(
+                texts = texts,
+                language = generationLanguage,
+                onComplete = {
+                    runOnUiThread {
+                        binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
+                    }
+                }
+            )
+
+            if (success) {
+                binding.playAllButton.setImageResource(android.R.drawable.ic_media_pause)
             } else {
                 Toast.makeText(
                     this,

@@ -56,15 +56,31 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Conversation Title -->
-                <TextView
-                    android:id="@+id/conversationTitle"
-                    android:layout_width="wrap_content"
+                <!-- Conversation Title and Play All Button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorPrimary"
-                    tools:text="At a Restaurant" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/conversationTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorPrimary"
+                        tools:text="At a Restaurant" />
+
+                    <ImageButton
+                        android:id="@+id/playAllButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@android:drawable/ic_media_play"
+                        android:contentDescription="@string/button_play_all" />
+                </LinearLayout>
 
                 <!-- Key Sentence (optional) -->
                 <TextView
