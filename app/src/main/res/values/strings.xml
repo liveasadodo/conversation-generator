@@ -4,6 +4,8 @@
 
     <!-- Main Screen -->
     <string name="title_main">Conversation Generator</string>
+    <string name="label_generation_language">Generation Language</string>
+    <string name="label_interface_language">Interface Language (for translation)</string>
     <string name="hint_situation">Enter a situation…</string>
     <string name="button_generate">Generate</string>
     <string name="button_clear">Clear</string>

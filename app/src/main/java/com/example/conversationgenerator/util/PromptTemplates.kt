@@ -1,24 +1,57 @@
 package com.example.conversationgenerator.util
 
+import com.example.conversationgenerator.data.model.Language
+
 object PromptTemplates {
-    fun generateConversationPrompt(situation: String): String {
-        return """
-            Please generate a natural English conversation suitable for the following situation.
+    fun generateConversationPrompt(
+        situation: String,
+        generationLanguage: Language = Language.ENGLISH,
+        interfaceLanguage: Language? = null
+    ): String {
+        val languageName = generationLanguage.displayName
+        val includeTranslation = interfaceLanguage != null && interfaceLanguage != generationLanguage
 
-            Requirements:
-            - Conversation should consist of 2-3 exchanges
-            - Use practical and natural expressions
-            - Clearly distinguish each speaker's dialogue
-            - Include appropriate greetings and closing
+        return if (includeTranslation) {
+            """
+                Please generate a natural $languageName conversation suitable for the following situation.
 
-            Situation: $situation
+                Requirements:
+                - Conversation should consist of 2-3 exchanges
+                - Use practical and natural expressions
+                - Clearly distinguish each speaker's dialogue
+                - Include appropriate greetings and closing
 
-            Format:
-            **Title**
+                Situation: $situation
 
-            Speaker A: ...
-            Speaker B: ...
-        """.trimIndent()
+                Format:
+                **Title**
+
+                Speaker A: ... (in $languageName)
+                (${interfaceLanguage!!.displayName} translation: ...)
+                Speaker B: ... (in $languageName)
+                (${interfaceLanguage.displayName} translation: ...)
+
+                Provide the conversation in $languageName with ${interfaceLanguage.displayName} translations in parentheses after each line.
+            """.trimIndent()
+        } else {
+            """
+                Please generate a natural $languageName conversation suitable for the following situation.
+
+                Requirements:
+                - Conversation should consist of 2-3 exchanges
+                - Use practical and natural expressions
+                - Clearly distinguish each speaker's dialogue
+                - Include appropriate greetings and closing
+
+                Situation: $situation
+
+                Format:
+                **Title**
+
+                Speaker A: ...
+                Speaker B: ...
+            """.trimIndent()
+        }
     }
 
     fun generateWithDifficulty(situation: String, difficulty: String): String {

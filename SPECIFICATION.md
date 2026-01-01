@@ -2,7 +2,7 @@
 
 ## Overview
 
-Conversation Generator is an Android application that generates English conversation examples based on user-provided situations using Google AI Studio API (Gemini).
+Conversation Generator is an Android application that generates multilingual conversation examples based on user-provided situations using Google AI Studio API (Gemini). Users can select the generation language for the conversation and optionally display translations in their preferred interface language.
 
 ## Core Features
 
@@ -15,13 +15,23 @@ Conversation Generator is an Android application that generates English conversa
   - Asking for directions
   - Checking in at a hotel
 
-### 2. Conversation Generation
-- Generate natural English conversations using Google AI Studio API (Gemini)
+### 2. Language Selection
+- **Generation Language**: Select the language for generating conversations
+  - Supported languages: English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
+  - Default: English
+- **Interface Language**: Select the language for UI and translations
+  - Supported languages: English, Japanese
+  - Default: Japanese
+- Language settings persist across app sessions
+
+### 3. Conversation Generation
+- Generate natural conversations in the selected generation language using Google AI Studio API (Gemini)
 - Conversations consist of 2-3 exchanges
 - Display generated conversation in readable format
+- Optionally display translation in interface language (when different from generation language)
 - Loading indicator during generation
 
-### 3. Output Management
+### 4. Output Management
 - Copy generated conversation to clipboard
 - Share conversation via Android share menu
 - Display success/error messages appropriately
@@ -32,19 +42,20 @@ Conversation Generator is an Android application that generates English conversa
 
 #### Google AI Studio API (Gemini)
 - **Endpoint**: `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
-- **Model**: `gemini-1.5-flash` (recommended for production - fast and cost-effective)
-- **Alternative**: `gemini-1.5-pro` (for higher quality outputs)
+- **Model**: `gemini-2.5-flash` (recommended for production - fast and cost-effective)
 - **Max Tokens**: Configured via `generationConfig.maxOutputTokens`
 - **API Key**: Passed as query parameter `?key=YOUR_API_KEY`
 
 #### Request Format
+
+**Generation Only (No Translation)**
 ```json
 {
   "contents": [
     {
       "parts": [
         {
-          "text": "Please generate a natural English conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}"
+          "text": "Please generate a natural {generation_language} conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}\n\nFormat:\n**Title**\n\nSpeaker A: ...\nSpeaker B: ..."
         }
       ]
     }
@@ -52,6 +63,27 @@ Conversation Generator is an Android application that generates English conversa
   "generationConfig": {
     "temperature": 0.7,
     "maxOutputTokens": 1024,
+    "topP": 0.95,
+    "topK": 40
+  }
+}
+```
+
+**Generation with Translation**
+```json
+{
+  "contents": [
+    {
+      "parts": [
+        {
+          "text": "Please generate a natural {generation_language} conversation suitable for the following situation. The conversation should consist of 2-3 exchanges.\n\nSituation: {user_input}\n\nFormat:\n**Title**\n\nSpeaker A: ...\n({interface_language} translation: ...)\nSpeaker B: ...\n({interface_language} translation: ...)\n\nProvide the conversation in {generation_language} with {interface_language} translations in parentheses after each line."
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 2048,
     "topP": 0.95,
     "topK": 40
   }
@@ -111,10 +143,26 @@ User Input → ViewModel → Repository → API Service → Gemini API
 ```kotlin
 data class ConversationRequest(
     val situation: String,
+    val generationLanguage: String = "English", // English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
+    val interfaceLanguage: String = "English", // English, Japanese
+    val includeTranslation: Boolean = false, // Auto-enable when generationLanguage != interfaceLanguage
     val difficulty: String = "intermediate", // beginner, intermediate, advanced
-    val length: String = "medium", // short (1-2 turns), medium (2-3 turns), long (4-5 turns)
-    val includeTranslation: Boolean = false
+    val length: String = "medium" // short (1-2 turns), medium (2-3 turns), long (4-5 turns)
 )
+```
+
+#### Language
+```kotlin
+enum class Language(val displayName: String, val code: String) {
+    ENGLISH("English", "en"),
+    JAPANESE("日本語", "ja"),
+    SPANISH("Español", "es"),
+    FRENCH("Français", "fr"),
+    GERMAN("Deutsch", "de"),
+    CHINESE("中文", "zh"),
+    KOREAN("한국어", "ko"),
+    HINDI("हिन्दी", "hi")
+}
 ```
 
 #### GeminiApiRequest
@@ -215,17 +263,24 @@ data class UsageMetadata(
 
 #### Main Screen Layout
 1. **Header**: App title
-2. **Input Section**:
+2. **Language Selection Section**:
+   - **Generation Language Spinner**: Dropdown to select conversation language
+     - Options: English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
+   - **Interface Language Spinner**: Dropdown to select UI/translation language
+     - Options: English, Japanese
+   - **Translation Toggle**: Checkbox to show/hide translations (auto-enabled when languages differ)
+3. **Input Section**:
    - Multi-line EditText for situation input
    - Character counter (optional)
    - Example chips/buttons for quick input
-3. **Action Buttons**:
+4. **Action Buttons**:
    - Generate button (primary action)
    - Clear button (secondary action)
-4. **Result Section**:
+5. **Result Section**:
    - ScrollView for generated conversation
+   - When translation enabled: Display both original and translation
    - Copy and Share buttons
-5. **Loading State**: Progress indicator overlay
+6. **Loading State**: Progress indicator overlay
 
 #### States
 - **Initial**: Empty input, generate button enabled
@@ -241,17 +296,22 @@ data class UsageMetadata(
 
 ### Future Enhancements
 
-#### Phase 2
-- Conversation history storage (local database)
-- Favorite conversations feature
-- Multiple difficulty levels
-- Conversation length options
+#### Phase 2 (Completed - Multilingual Support)
+- ✅ Multiple language support for conversation generation
+- ✅ Translation display for learning purposes
+- ✅ Language preference persistence
 
 #### Phase 3
-- Japanese translation toggle
+- Conversation history storage (local database)
+- Favorite conversations feature
+- Multiple difficulty levels UI
+- Conversation length options UI
+
+#### Phase 4
 - Audio playback of conversations (TTS)
 - Offline mode with cached conversations
 - User accounts and cloud sync
+- Additional interface languages (Spanish, French, etc.)
 
 ## Testing Requirements
 

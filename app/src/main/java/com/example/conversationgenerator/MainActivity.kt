@@ -6,11 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.conversationgenerator.data.api.RetrofitClient
 import com.example.conversationgenerator.data.model.ApiResult
+import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.repository.ConversationRepository
 import com.example.conversationgenerator.databinding.ActivityMainBinding
 import com.example.conversationgenerator.ui.viewmodel.MainViewModel
@@ -26,6 +29,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "api_keys"
         private const val KEY_GEMINI_API_KEY = "gemini_api_key"
+        private const val PREFS_LANGUAGE = "language_prefs"
+        private const val KEY_GENERATION_LANGUAGE = "generation_language"
+        private const val KEY_INTERFACE_LANGUAGE = "interface_language"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,6 +111,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
+        // Setup language spinners
+        setupLanguageSpinners()
+
         // Example chips click listeners
         binding.example1Chip.setOnClickListener {
             binding.situationEditText.setText(R.string.example_1)
@@ -139,6 +148,63 @@ class MainActivity : AppCompatActivity() {
         // Share button
         binding.shareButton.setOnClickListener {
             shareConversation(generatedConversation)
+        }
+    }
+
+    private fun setupLanguageSpinners() {
+        // Load saved language preferences
+        val languagePrefs = getSharedPreferences(PREFS_LANGUAGE, Context.MODE_PRIVATE)
+        val savedGenerationLanguageCode = languagePrefs.getString(KEY_GENERATION_LANGUAGE, Language.ENGLISH.code)
+        val savedInterfaceLanguageCode = languagePrefs.getString(KEY_INTERFACE_LANGUAGE, Language.JAPANESE.code)
+
+        // Setup Generation Language Spinner
+        val generationLanguages = Language.getGenerationLanguages()
+        val generationAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            generationLanguages.map { it.displayName }
+        )
+        generationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.generationLanguageSpinner.adapter = generationAdapter
+
+        // Set saved language or default to English
+        val savedGenerationIndex = generationLanguages.indexOfFirst { it.code == savedGenerationLanguageCode }
+        binding.generationLanguageSpinner.setSelection(if (savedGenerationIndex >= 0) savedGenerationIndex else 0)
+
+        binding.generationLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedLanguage = generationLanguages[position]
+                viewModel.setGenerationLanguage(selectedLanguage)
+                // Save preference
+                languagePrefs.edit().putString(KEY_GENERATION_LANGUAGE, selectedLanguage.code).apply()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Setup Interface Language Spinner
+        val interfaceLanguages = Language.getInterfaceLanguages()
+        val interfaceAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            interfaceLanguages.map { it.displayName }
+        )
+        interfaceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.interfaceLanguageSpinner.adapter = interfaceAdapter
+
+        // Set saved language or default to Japanese
+        val savedInterfaceIndex = interfaceLanguages.indexOfFirst { it.code == savedInterfaceLanguageCode }
+        binding.interfaceLanguageSpinner.setSelection(if (savedInterfaceIndex >= 0) savedInterfaceIndex else 1)
+
+        binding.interfaceLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedLanguage = interfaceLanguages[position]
+                viewModel.setInterfaceLanguage(selectedLanguage)
+                // Save preference
+                languagePrefs.edit().putString(KEY_INTERFACE_LANGUAGE, selectedLanguage.code).apply()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 

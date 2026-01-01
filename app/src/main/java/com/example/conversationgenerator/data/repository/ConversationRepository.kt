@@ -7,6 +7,7 @@ import com.example.conversationgenerator.data.model.ApiResult
 import com.example.conversationgenerator.data.model.Content
 import com.example.conversationgenerator.data.model.GeminiApiRequest
 import com.example.conversationgenerator.data.model.GenerationConfig
+import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.model.Part
 import com.example.conversationgenerator.util.ModelConfig
 import com.example.conversationgenerator.util.PromptTemplates
@@ -26,6 +27,8 @@ class ConversationRepository(
 
     suspend fun generateConversation(
         situation: String,
+        generationLanguage: Language = Language.ENGLISH,
+        interfaceLanguage: Language? = null,
         difficulty: String = "intermediate",
         length: String = "medium"
     ): ApiResult<String> {
@@ -37,16 +40,23 @@ class ConversationRepository(
                 // Get model name based on build type
                 val modelName = ModelConfig.getModelName(BuildConfig.BUILD_TYPE)
 
+                // Check if translation is needed
+                val includeTranslation = interfaceLanguage != null && interfaceLanguage != generationLanguage
+
                 // Generate prompt based on parameters
                 val prompt = when {
                     difficulty != "intermediate" -> PromptTemplates.generateWithDifficulty(situation, difficulty)
                     length != "medium" -> PromptTemplates.generateWithLength(situation, length)
-                    else -> PromptTemplates.generateConversationPrompt(situation)
+                    else -> PromptTemplates.generateConversationPrompt(situation, generationLanguage, interfaceLanguage)
                 }
+
+                // Adjust max tokens based on whether translation is included
+                val maxTokens = if (includeTranslation) 2048 else ModelConfig.MAX_OUTPUT_TOKENS
 
                 // Log request in debug mode
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Request - Model: $modelName, Situation: $situation")
+                    Log.d(TAG, "Request - Model: $modelName, Language: ${generationLanguage.displayName}, " +
+                            "Interface: ${interfaceLanguage?.displayName ?: "None"}, Situation: $situation")
                 }
 
                 // Make API call with retry logic
@@ -61,7 +71,7 @@ class ConversationRepository(
                             ),
                             generationConfig = GenerationConfig(
                                 temperature = ModelConfig.TEMPERATURE,
-                                maxOutputTokens = ModelConfig.MAX_OUTPUT_TOKENS,
+                                maxOutputTokens = maxTokens,
                                 topP = ModelConfig.TOP_P,
                                 topK = ModelConfig.TOP_K
                             )
