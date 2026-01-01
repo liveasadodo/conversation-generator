@@ -7,6 +7,9 @@
     <string name="label_generation_language">Generation Language</string>
     <string name="label_interface_language">Interface Language (for translation)</string>
     <string name="label_formality">Formality</string>
+    <string name="label_conversation_length">Conversation Length</string>
+    <string name="conversation_length_format">%d turns</string>
+    <string name="conversation_length_default">3 turns</string>
     <string name="hint_situation">Enter a situation…</string>
     <string name="label_key_sentence">Key Sentence (Optional)</string>
     <string name="hint_key_sentence">Enter a sentence to include in the conversation…</string>

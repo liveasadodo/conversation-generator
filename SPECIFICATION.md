@@ -31,12 +31,19 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Default: Casual
 - Settings persist across sessions
 
-### 5. Conversation Generation
-- Generates 2-3 exchange conversations using Gemini API
+### 5. Conversation Length Selection
+- **Length**: Select the number of exchanges (turns) in the conversation
+  - Range: 2 to 5 turns
+  - Each turn consists of Speaker A and Speaker B dialogue
+- Default: 3 turns
+- Settings persist across sessions
+
+### 6. Conversation Generation
+- Generates conversations with specified number of exchanges using Gemini API
 - Two-column layout: Original (left) and Translation (right) when translation enabled
 - Loading indicator during generation
 
-### 6. Text-to-Speech
+### 7. Text-to-Speech
 - Android TextToSpeech API for audio playback
 - Speaker button next to each dialogue line
 - Play/Stop toggle with visual feedback
@@ -44,7 +51,7 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Supports all 8 generation languages
 - Offline capable (when language data installed)
 
-### 7. Conversation History
+### 8. Conversation History
 - Local storage using Room database
 - Stores last 30 conversations
 - Auto-delete oldest when limit exceeded
@@ -53,7 +60,7 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Delete individual conversations
 - View historical conversation details
 
-### 8. Output Management
+### 9. Output Management
 - Copy to clipboard
 - Share via Android share menu
 
@@ -70,8 +77,9 @@ Conversation Generator is an Android app that generates multilingual conversatio
 
 **Standard Generation:**
 ```
-Prompt: Generate a natural {language} conversation for: {situation}
+Prompt: Generate a natural {language} conversation with {length} exchanges for: {situation}
 Format: **Title**\nSpeaker A: ...\nSpeaker B: ...
+Note: {length} exchanges means {length} pairs of Speaker A and Speaker B dialogue
 ```
 
 **With Key Sentence:**
@@ -162,6 +170,7 @@ data class ConversationEntity(
     val generationLanguage: String,
     val interfaceLanguage: String?,
     val formality: String = "CASUAL",
+    val conversationLength: Int = 3,
     val timestamp: Long = System.currentTimeMillis(),
     val isFavorite: Boolean = false
 )
@@ -195,10 +204,11 @@ data class ConversationEntity(
 2. Language selection (generation, interface)
 3. Situation input
 4. Key sentence input (optional, collapsible)
-5. Formality selection (spinner above action buttons)
-6. Action buttons (Generate, Clear)
-7. Result display with speaker buttons
-8. Copy/Share buttons
+5. Formality selection (spinner)
+6. Conversation length selection (SeekBar with display, 2-5 turns)
+7. Action buttons (Generate, Clear)
+8. Result display with speaker buttons
+9. Copy/Share buttons
 
 **History Screen:**
 1. Filter toggle (All/Favorites)

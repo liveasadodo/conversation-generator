@@ -35,7 +35,8 @@ object PromptTemplates {
         generationLanguage: Language = Language.ENGLISH,
         interfaceLanguage: Language? = null,
         keySentence: String? = null,
-        formality: Formality = Formality.CASUAL
+        formality: Formality = Formality.CASUAL,
+        conversationLength: Int = 3
     ): String {
         val languageName = generationLanguage.displayName
         val includeTranslation = interfaceLanguage != null && interfaceLanguage != generationLanguage
@@ -48,7 +49,8 @@ object PromptTemplates {
                     Please generate a natural $languageName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence.
 
                     Requirements:
-                    - Conversation should consist of 2-3 exchanges
+                    - Conversation should consist of exactly $conversationLength exchanges (turns)
+                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
                     $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
@@ -74,7 +76,8 @@ object PromptTemplates {
                     Please generate a natural $languageName conversation suitable for the following situation.
 
                     Requirements:
-                    - Conversation should consist of 2-3 exchanges
+                    - Conversation should consist of exactly $conversationLength exchanges (turns)
+                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
                     $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
@@ -98,7 +101,8 @@ object PromptTemplates {
                     Please generate a natural $languageName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence.
 
                     Requirements:
-                    - Conversation should consist of 2-3 exchanges
+                    - Conversation should consist of exactly $conversationLength exchanges (turns)
+                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
                     $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
@@ -119,7 +123,8 @@ object PromptTemplates {
                     Please generate a natural $languageName conversation suitable for the following situation.
 
                     Requirements:
-                    - Conversation should consist of 2-3 exchanges
+                    - Conversation should consist of exactly $conversationLength exchanges (turns)
+                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
                     $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing

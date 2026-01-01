@@ -76,7 +76,7 @@
             android:visibility="gone"
             tools:text="Key: I'd like to order..." />
 
-        <!-- Languages, formality and timestamp -->
+        <!-- Languages and timestamp -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,22 +94,40 @@
                 tools:text="English → 日本語" />
 
             <TextView
-                android:id="@+id/formalityText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:textSize="12sp"
-                android:textColor="?attr/colorSecondary"
-                android:textStyle="bold"
-                tools:text="Casual" />
-
-            <TextView
                 android:id="@+id/timestampText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 tools:text="2 hours ago" />
+        </LinearLayout>
+
+        <!-- Formality and Conversation Length -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/formalityText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:textSize="12sp"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold"
+                tools:text="Casual" />
+
+            <TextView
+                android:id="@+id/conversationLengthText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="?attr/colorTertiary"
+                android:textStyle="bold"
+                tools:text="3 turns" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

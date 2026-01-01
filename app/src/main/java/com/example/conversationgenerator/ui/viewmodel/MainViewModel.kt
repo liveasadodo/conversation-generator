@@ -31,6 +31,9 @@ class MainViewModel(
     private val _formality = MutableLiveData<Formality>(Formality.CASUAL)
     val formality: LiveData<Formality> = _formality
 
+    private val _conversationLength = MutableLiveData<Int>(3)
+    val conversationLength: LiveData<Int> = _conversationLength
+
     fun setGenerationLanguage(language: Language) {
         _generationLanguage.value = language
     }
@@ -43,11 +46,14 @@ class MainViewModel(
         _formality.value = formality
     }
 
+    fun setConversationLength(length: Int) {
+        _conversationLength.value = length
+    }
+
     fun generateConversation(
         situation: String,
         keySentence: String? = null,
-        difficulty: String = "intermediate",
-        length: String = "medium"
+        difficulty: String = "intermediate"
     ) {
         // Validate input
         when (val validationResult = InputValidator.validateSituation(situation)) {
@@ -62,8 +68,8 @@ class MainViewModel(
                         generationLanguage = _generationLanguage.value ?: Language.ENGLISH,
                         interfaceLanguage = _interfaceLanguage.value,
                         formality = _formality.value ?: Formality.CASUAL,
-                        difficulty = difficulty,
-                        length = length
+                        conversationLength = _conversationLength.value ?: 3,
+                        difficulty = difficulty
                     )
                     _conversationState.value = result
                 }

@@ -39,6 +39,7 @@ class ConversationHistoryAdapter(
         private val keySentenceText: TextView = itemView.findViewById(R.id.keySentenceText)
         private val languageInfo: TextView = itemView.findViewById(R.id.languageInfo)
         private val formalityText: TextView = itemView.findViewById(R.id.formalityText)
+        private val conversationLengthText: TextView = itemView.findViewById(R.id.conversationLengthText)
         private val timestampText: TextView = itemView.findViewById(R.id.timestampText)
         private val favoriteButton: ImageButton = itemView.findViewById(R.id.favoriteButton)
         private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
@@ -71,6 +72,12 @@ class ConversationHistoryAdapter(
                 com.example.conversationgenerator.data.model.Language.ENGLISH
             }
             formalityText.text = formality.getDisplayName(currentLanguage)
+
+            // Show conversation length
+            conversationLengthText.text = itemView.context.getString(
+                R.string.conversation_length_format,
+                conversation.conversationLength
+            )
 
             // Format timestamp
             timestampText.text = formatTimestamp(conversation.timestamp)

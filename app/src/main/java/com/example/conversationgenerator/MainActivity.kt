@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -46,6 +47,8 @@ class MainActivity : AppCompatActivity() {
         private const val KEY_GENERATION_LANGUAGE = "generation_language"
         private const val KEY_INTERFACE_LANGUAGE = "interface_language"
         private const val KEY_FORMALITY = "formality"
+        private const val KEY_CONVERSATION_LENGTH = "conversation_length"
+        private const val DEFAULT_CONVERSATION_LENGTH = 3
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,6 +165,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupUI() {
         // Setup language spinners
         setupLanguageSpinners()
+
+        // Setup conversation length SeekBar
+        setupConversationLengthSeekBar()
 
         // Example chips click listeners
         binding.example1Chip.setOnClickListener {
@@ -302,6 +308,36 @@ class MainActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+    }
+
+    private fun setupConversationLengthSeekBar() {
+        val languagePrefs = getSharedPreferences(PREFS_LANGUAGE, Context.MODE_PRIVATE)
+        val savedLength = languagePrefs.getInt(KEY_CONVERSATION_LENGTH, DEFAULT_CONVERSATION_LENGTH)
+
+        // SeekBar range is 0-3, representing 2-5 turns
+        binding.conversationLengthSeekBar.progress = savedLength - 2
+        updateConversationLengthText(savedLength)
+        viewModel.setConversationLength(savedLength)
+
+        binding.conversationLengthSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val length = progress + 2 // Convert 0-3 to 2-5
+                updateConversationLengthText(length)
+                viewModel.setConversationLength(length)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                val length = (seekBar?.progress ?: 0) + 2
+                // Save preference
+                languagePrefs.edit().putInt(KEY_CONVERSATION_LENGTH, length).apply()
+            }
+        })
+    }
+
+    private fun updateConversationLengthText(length: Int) {
+        binding.conversationLengthValue.text = getString(R.string.conversation_length_format, length)
     }
 
     private fun observeViewModel() {
@@ -456,6 +492,7 @@ class MainActivity : AppCompatActivity() {
             val genLang = viewModel.generationLanguage.value?.displayName ?: "English"
             val intLang = viewModel.interfaceLanguage.value?.displayName
             val formalityName = viewModel.formality.value?.name ?: Formality.CASUAL.name
+            val conversationLength = viewModel.conversationLength.value ?: DEFAULT_CONVERSATION_LENGTH
 
             historyRepository.saveConversation(
                 title = title,
@@ -464,7 +501,8 @@ class MainActivity : AppCompatActivity() {
                 conversationText = conversationText,
                 generationLanguage = genLang,
                 interfaceLanguage = intLang,
-                formality = formalityName
+                formality = formalityName,
+                conversationLength = conversationLength
             )
         }
     }

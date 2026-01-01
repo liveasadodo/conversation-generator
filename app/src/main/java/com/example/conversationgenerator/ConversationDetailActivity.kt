@@ -71,6 +71,12 @@ class ConversationDetailActivity : AppCompatActivity() {
                 }
                 binding.formalityLabel.text = formality.getDisplayName(currentLanguage)
 
+                // Display conversation length
+                binding.conversationLengthLabel.text = getString(
+                    R.string.conversation_length_format,
+                    conversation.conversationLength
+                )
+
                 displayConversation(conversation.conversationText)
             } else {
                 Toast.makeText(this@ConversationDetailActivity, "Conversation not found", Toast.LENGTH_SHORT).show()
