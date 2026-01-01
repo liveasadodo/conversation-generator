@@ -3,10 +3,9 @@ package com.example.conversationgenerator.util
 object ModelConfig {
     fun getModelName(buildType: String): String {
         return when (buildType) {
-            "debug" -> "gemini-1.5-flash"  // Fast and free for development
-            "release" -> "gemini-1.5-flash"  // Fast and free for production
-            // Alternative: "gemini-1.5-pro" for higher quality if needed
-            else -> "gemini-1.5-flash"
+            "debug" -> "gemini-2.5-flash"
+            "release" -> "gemini-2.5-flash"
+            else -> "gemini-2.5-flash"
         }
     }
 

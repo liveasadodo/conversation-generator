@@ -100,12 +100,30 @@ class ConversationRepository(
     private fun handleError(error: Throwable): ApiResult<Nothing> {
         return when (error) {
             is HttpException -> {
+                // Try to parse error response body for more details
+                val errorBody = try {
+                    error.response()?.errorBody()?.string()
+                } catch (e: Exception) {
+                    null
+                }
+
+                // Check if error body contains API key related message
+                val isApiKeyError = errorBody?.contains("API key", ignoreCase = true) == true ||
+                                   errorBody?.contains("API_KEY_INVALID", ignoreCase = true) == true
+
                 when (error.code()) {
-                    400 -> ApiResult.Error(400, "Invalid request")
-                    401, 403 -> ApiResult.Error(401, "Invalid API key")
-                    429 -> ApiResult.Error(429, "Rate limit exceeded")
-                    500 -> ApiResult.Error(500, "Server error")
-                    else -> ApiResult.Error(error.code(), "Unknown error")
+                    400 -> {
+                        if (isApiKeyError) {
+                            ApiResult.Error(400, "Invalid API key. Please check your Google AI Studio API key.")
+                        } else {
+                            ApiResult.Error(400, "Invalid request. Please try again.")
+                        }
+                    }
+                    401, 403 -> ApiResult.Error(401, "Invalid API key. Please check your Google AI Studio API key.")
+                    404 -> ApiResult.Error(404, "Model not found. Please update the app or contact support.")
+                    429 -> ApiResult.Error(429, "Rate limit exceeded. Please wait a moment and try again.")
+                    500 -> ApiResult.Error(500, "Server error. Please try again later.")
+                    else -> ApiResult.Error(error.code(), "Error: ${error.message()}")
                 }
             }
             is IOException -> ApiResult.NetworkError

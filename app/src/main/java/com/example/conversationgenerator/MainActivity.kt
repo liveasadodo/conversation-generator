@@ -58,22 +58,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun showApiKeyDialog() {
         val input = android.widget.EditText(this)
-        input.hint = "Enter your Google AI Studio API Key"
+        input.hint = "Enter API key"
+
+        val message = """
+            Please enter your Google AI Studio API key.
+
+            To get an API key:
+            1. Visit https://aistudio.google.com/
+            2. Click "Get API key"
+            3. Create a new API key
+            4. Copy and paste it here
+        """.trimIndent()
 
         MaterialAlertDialogBuilder(this)
             .setTitle("API Key Required")
-            .setMessage("Please enter your Google AI Studio API key to use this app.")
+            .setMessage(message)
             .setView(input)
             .setPositiveButton("Save") { _, _ ->
                 val apiKey = input.text.toString().trim()
-                if (apiKey.isNotEmpty()) {
+                if (apiKey.isEmpty()) {
+                    Toast.makeText(this, "API key is required", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else if (apiKey.length < 20) {
+                    Toast.makeText(this, "API key seems too short. Please check and try again.", Toast.LENGTH_LONG).show()
+                    // Show dialog again
+                    showApiKeyDialog()
+                } else {
                     saveApiKey(apiKey)
                     initializeViewModel(apiKey)
                     setupUI()
                     observeViewModel()
-                } else {
-                    Toast.makeText(this, "API key is required", Toast.LENGTH_SHORT).show()
-                    finish()
                 }
             }
             .setNegativeButton("Cancel") { _, _ ->
@@ -173,7 +187,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        // If error is related to API key, offer to reset it
+        if (message.contains("API key", ignoreCase = true)) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("API Key Error")
+                .setMessage(message + "\n\nWould you like to enter a new API key?")
+                .setPositiveButton("Yes") { _, _ ->
+                    resetApiKey()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        } else {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun resetApiKey() {
+        // Clear existing API key
+        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPreferences.edit().remove(KEY_GEMINI_API_KEY).apply()
+
+        // Show dialog to enter new API key
+        showApiKeyDialog()
     }
 
     private fun copyToClipboard(text: String) {
