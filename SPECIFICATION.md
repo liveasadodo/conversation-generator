@@ -53,6 +53,10 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Visual feedback showing play/stop state
 - Supports all 8 generation languages
 - Offline capable (when language data installed)
+- **Speaker-specific voices**: Automatically assigns distinct voice characteristics (pitch and speech rate) to each speaker
+  - Each unique speaker gets a consistent voice profile throughout the conversation
+  - Supports 2+ speakers with automatically differentiated voices
+  - Voice profiles use pitch variations (0.7-1.3) and speech rate adjustments (0.85-1.15) for clear auditory distinction
 
 ### 8. Conversation History
 - Local storage using Room database

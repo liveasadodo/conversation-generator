@@ -18,15 +18,35 @@ class TTSManager(
     private var isInitialized = false
     private var currentUtteranceId: String? = null
     private var playAllTexts: List<String> = emptyList()
+    private var playAllSpeakers: List<String?> = emptyList()
     private var currentPlayAllIndex: Int = 0
     private var playAllLanguage: Language? = null
     private var onPlayAllComplete: (() -> Unit)? = null
     private var onPlayAllProgress: ((Int, Int) -> Unit)? = null
     private var isPlayingAll = false
 
+    // Speaker voice profiles mapping
+    private val speakerVoiceProfiles = mutableMapOf<String, VoiceProfile>()
+    private val voicePresets = listOf(
+        VoiceProfile(pitch = 0.7f, speechRate = 0.9f),   // Deep, slow
+        VoiceProfile(pitch = 1.3f, speechRate = 1.1f),   // High, fast
+        VoiceProfile(pitch = 0.85f, speechRate = 1.05f), // Medium-low, slightly fast
+        VoiceProfile(pitch = 1.15f, speechRate = 0.95f), // Medium-high, slightly slow
+        VoiceProfile(pitch = 1.0f, speechRate = 0.85f),  // Normal pitch, slow
+        VoiceProfile(pitch = 1.0f, speechRate = 1.15f)   // Normal pitch, fast
+    )
+
     companion object {
         private const val TAG = "TTSManager"
     }
+
+    /**
+     * Voice profile for a speaker
+     */
+    data class VoiceProfile(
+        val pitch: Float,
+        val speechRate: Float
+    )
 
     init {
         initializeTTS()
@@ -68,12 +88,33 @@ class TTSManager(
     }
 
     /**
+     * Get or assign a voice profile for a speaker
+     */
+    private fun getVoiceProfileForSpeaker(speaker: String): VoiceProfile {
+        return speakerVoiceProfiles.getOrPut(speaker) {
+            val index = speakerVoiceProfiles.size % voicePresets.size
+            val profile = voicePresets[index]
+            Log.d(TAG, "Assigned voice profile to $speaker: pitch=${profile.pitch}, rate=${profile.speechRate}")
+            profile
+        }
+    }
+
+    /**
+     * Apply voice profile settings to TTS
+     */
+    private fun applyVoiceProfile(profile: VoiceProfile) {
+        tts?.setPitch(profile.pitch)
+        tts?.setSpeechRate(profile.speechRate)
+    }
+
+    /**
      * Speak the given text in the specified language
      * @param text The text to speak
      * @param language The language for pronunciation
+     * @param speaker The speaker name (optional, for voice differentiation)
      * @return True if speech started successfully, false otherwise
      */
-    fun speak(text: String, language: Language): Boolean {
+    fun speak(text: String, language: Language, speaker: String? = null): Boolean {
         if (!isInitialized || tts == null) {
             Log.w(TAG, "TTS not initialized")
             return false
@@ -89,10 +130,18 @@ class TTSManager(
             }
             else -> {
                 stop() // Stop any currently playing speech
+
+                // Apply speaker-specific voice profile if speaker is provided
+                if (speaker != null) {
+                    val profile = getVoiceProfileForSpeaker(speaker)
+                    applyVoiceProfile(profile)
+                }
+
                 val utteranceId = "tts_${System.currentTimeMillis()}"
                 currentUtteranceId = utteranceId
                 tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
-                Log.d(TAG, "Speaking: $text in ${language.displayName}")
+                Log.d(TAG, "Speaking: $text in ${language.displayName}" +
+                    if (speaker != null) " by $speaker" else "")
                 true
             }
         }
@@ -157,6 +206,7 @@ class TTSManager(
      * Play all texts sequentially
      * @param texts List of texts to speak
      * @param language Language for pronunciation
+     * @param speakers List of speaker names corresponding to each text (optional)
      * @param onComplete Callback when all texts have been spoken
      * @param onProgress Callback for progress updates (current index, total count)
      * @return True if play all started successfully, false otherwise
@@ -164,6 +214,7 @@ class TTSManager(
     fun playAll(
         texts: List<String>,
         language: Language,
+        speakers: List<String?>? = null,
         onComplete: (() -> Unit)? = null,
         onProgress: ((Int, Int) -> Unit)? = null
     ): Boolean {
@@ -191,6 +242,7 @@ class TTSManager(
 
         // Set up play all state
         playAllTexts = texts
+        playAllSpeakers = speakers ?: List(texts.size) { null }
         playAllLanguage = language
         currentPlayAllIndex = 0
         onPlayAllComplete = onComplete
@@ -212,14 +264,22 @@ class TTSManager(
         }
 
         val text = playAllTexts[currentPlayAllIndex]
+        val speaker = playAllSpeakers.getOrNull(currentPlayAllIndex)
         val utteranceId = "play_all_$currentPlayAllIndex"
         currentUtteranceId = utteranceId
+
+        // Apply speaker-specific voice profile if speaker is provided
+        if (speaker != null) {
+            val profile = getVoiceProfileForSpeaker(speaker)
+            applyVoiceProfile(profile)
+        }
 
         // Report progress
         onPlayAllProgress?.invoke(currentPlayAllIndex, playAllTexts.size)
 
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
-        Log.d(TAG, "Playing ${currentPlayAllIndex + 1}/${playAllTexts.size}: $text")
+        Log.d(TAG, "Playing ${currentPlayAllIndex + 1}/${playAllTexts.size}: $text" +
+            if (speaker != null) " by $speaker" else "")
 
         currentPlayAllIndex++
     }
@@ -233,6 +293,7 @@ class TTSManager(
             isPlayingAll = false
             onPlayAllComplete?.invoke()
             playAllTexts = emptyList()
+            playAllSpeakers = emptyList()
             playAllLanguage = null
             currentPlayAllIndex = 0
             onPlayAllComplete = null

@@ -440,7 +440,7 @@ class MainActivity : AppCompatActivity() {
 
             // Setup speaker button
             speakButton.setOnClickListener {
-                handleSpeakButtonClick(speakButton, line.originalText)
+                handleSpeakButtonClick(speakButton, line.originalText, line.speaker)
             }
 
             binding.conversationContainer.addView(lineView)
@@ -524,7 +524,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleSpeakButtonClick(button: android.widget.ImageButton, text: String) {
+    private fun handleSpeakButtonClick(button: android.widget.ImageButton, text: String, speaker: String) {
         // Stop play all if active
         if (ttsManager.isPlayingAll()) {
             ttsManager.stopPlayAll()
@@ -544,8 +544,8 @@ class MainActivity : AppCompatActivity() {
                 currentPlayingButton?.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
             }
 
-            // Start playing new line
-            val success = ttsManager.speak(text, generationLanguage)
+            // Start playing new line with speaker-specific voice
+            val success = ttsManager.speak(text, generationLanguage, speaker)
             if (success) {
                 button.setImageResource(android.R.drawable.ic_lock_silent_mode)
                 currentPlayingButton = button
@@ -583,18 +583,20 @@ class MainActivity : AppCompatActivity() {
                 ttsManager.stop()
             }
 
-            // Get all texts from parsed conversation
+            // Get all texts and speakers from parsed conversation
             val texts = parsedConversation?.lines?.map { it.originalText } ?: emptyList()
+            val speakers = parsedConversation?.lines?.map { it.speaker } ?: emptyList()
 
             if (texts.isEmpty()) {
                 Toast.makeText(this, R.string.error_no_conversation, Toast.LENGTH_SHORT).show()
                 return
             }
 
-            // Start play all
+            // Start play all with speaker-specific voices
             val success = ttsManager.playAll(
                 texts = texts,
                 language = generationLanguage,
+                speakers = speakers,
                 onComplete = {
                     runOnUiThread {
                         binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
