@@ -2,6 +2,37 @@
 
 This document outlines the coding standards and best practices for integrating Google AI Studio API (Gemini) in this project.
 
+## Development Process Guidelines
+
+### Specification Documentation
+
+**IMPORTANT: Before implementing any feature or change, update SPECIFICATION.md first.**
+
+This is a mandatory project convention:
+
+1. **Before Code Implementation**: Always review and update [SPECIFICATION.md](SPECIFICATION.md) as needed before writing code
+2. **What to Update**:
+   - Feature descriptions if adding new functionality
+   - Architecture diagrams if modifying structure
+   - UI/UX specifications if changing user interface
+   - Phase status (Future → In Progress → Completed)
+   - Technical implementation details
+3. **Why This Matters**:
+   - Ensures specification stays in sync with implementation
+   - Provides clear design documentation before coding
+   - Helps catch design issues early
+   - Creates a reliable reference for future development
+
+**Workflow**:
+```
+User Request → Review SPECIFICATION.md → Update Specification → Implement Code → Test
+```
+
+**Example**:
+- User asks to implement conversation history
+- First: Update SPECIFICATION.md to document the history feature design
+- Then: Implement the code according to the updated specification
+
 ## API Configuration
 
 ### API Key Management
