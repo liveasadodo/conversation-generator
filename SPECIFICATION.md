@@ -22,6 +22,7 @@ Conversation Generator is an Android application that generates multilingual con
 - **Interface Language**: Select the language for UI and translations
   - Supported languages: English, Japanese
   - Default: Japanese
+  - **All UI strings and example situations are displayed in the selected interface language**
 - Language settings persist across app sessions
 
 ### 3. Conversation Generation
@@ -296,11 +297,6 @@ data class UsageMetadata(
 
 ### Future Enhancements
 
-#### Phase 2 (Completed - Multilingual Support)
-- ✅ Multiple language support for conversation generation
-- ✅ Translation display for learning purposes
-- ✅ Language preference persistence
-
 #### Phase 3
 - Conversation history storage (local database)
 - Favorite conversations feature
@@ -311,7 +307,16 @@ data class UsageMetadata(
 - Audio playback of conversations (TTS)
 - Offline mode with cached conversations
 - User accounts and cloud sync
-- Additional interface languages (Spanish, French, etc.)
+- Additional interface languages (Spanish, French, Chinese, Korean, etc.)
+
+### Localization
+
+#### Interface Language Support
+- All UI strings (labels, buttons, messages) are localized based on the selected interface language
+- Example situations are localized based on the selected interface language
+- Currently supported interface languages: English, Japanese
+- Localized strings are stored in `values/strings.xml` (English) and `values-ja/strings.xml` (Japanese)
+- String resources use the standard Android localization mechanism
 
 ## Testing Requirements
 

@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -11,6 +12,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import java.util.Locale
 import com.example.conversationgenerator.data.api.RetrofitClient
 import com.example.conversationgenerator.data.model.ApiResult
 import com.example.conversationgenerator.data.model.Language
@@ -35,6 +37,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply saved interface language
+        applySavedLocale()
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -48,6 +53,31 @@ class MainActivity : AppCompatActivity() {
             setupUI()
             observeViewModel()
         }
+    }
+
+    private fun applySavedLocale() {
+        val languagePrefs = getSharedPreferences(PREFS_LANGUAGE, Context.MODE_PRIVATE)
+        val savedInterfaceLanguageCode = languagePrefs.getString(KEY_INTERFACE_LANGUAGE, Language.JAPANESE.code)
+        val locale = Locale(savedInterfaceLanguageCode ?: Language.JAPANESE.code)
+        Locale.setDefault(locale)
+
+        val config = Configuration(resources.configuration)
+        config.setLocale(locale)
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+
+    private fun changeLocale(language: Language) {
+        val locale = Locale(language.code)
+        Locale.setDefault(locale)
+
+        val config = Configuration(resources.configuration)
+        config.setLocale(locale)
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Recreate activity to apply new locale
+        recreate()
     }
 
     private fun getApiKey(): String? {
@@ -199,9 +229,18 @@ class MainActivity : AppCompatActivity() {
         binding.interfaceLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedLanguage = interfaceLanguages[position]
-                viewModel.setInterfaceLanguage(selectedLanguage)
-                // Save preference
-                languagePrefs.edit().putString(KEY_INTERFACE_LANGUAGE, selectedLanguage.code).apply()
+                val currentLanguageCode = languagePrefs.getString(KEY_INTERFACE_LANGUAGE, Language.JAPANESE.code)
+
+                // Only change locale if it's different from current
+                if (selectedLanguage.code != currentLanguageCode) {
+                    viewModel.setInterfaceLanguage(selectedLanguage)
+                    // Save preference
+                    languagePrefs.edit().putString(KEY_INTERFACE_LANGUAGE, selectedLanguage.code).apply()
+                    // Change locale
+                    changeLocale(selectedLanguage)
+                } else {
+                    viewModel.setInterfaceLanguage(selectedLanguage)
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}

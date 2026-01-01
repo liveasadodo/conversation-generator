@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">会話文ジェネレーター</string>
+
+    <!-- Main Screen -->
+    <string name="title_main">会話文ジェネレーター</string>
+    <string name="label_generation_language">生成言語</string>
+    <string name="label_interface_language">利用言語（翻訳用）</string>
+    <string name="hint_situation">状況を入力してください…</string>
+    <string name="button_generate">生成</string>
+    <string name="button_clear">クリア</string>
+
+    <!-- Result -->
+    <string name="title_result">生成された会話文</string>
+    <string name="button_copy">コピー</string>
+    <string name="button_share">共有</string>
+
+    <!-- Messages -->
+    <string name="error_empty_situation">状況を入力してください</string>
+    <string name="error_network">ネットワークエラーが発生しました</string>
+    <string name="error_generation">会話文の生成に失敗しました</string>
+    <string name="message_copied">クリップボードにコピーしました</string>
+    <string name="loading">生成中…</string>
+
+    <!-- Examples -->
+    <string name="example_title">例：</string>
+    <string name="example_1">レストランで注文する</string>
+    <string name="example_2">道を尋ねる</string>
+    <string name="example_3">ホテルでチェックインする</string>
+</resources>
