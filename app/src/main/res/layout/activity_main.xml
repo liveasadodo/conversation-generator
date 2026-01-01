@@ -206,6 +206,22 @@
                     android:text="@string/example_3" />
             </com.google.android.material.chip.ChipGroup>
 
+            <!-- Formality Selection -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_formality"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="16dp" />
+
+            <Spinner
+                android:id="@+id/formalitySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:minHeight="48dp" />
+
             <!-- Action Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"

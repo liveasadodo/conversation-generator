@@ -30,6 +30,7 @@ class ConversationRepository(
         keySentence: String? = null,
         generationLanguage: Language = Language.ENGLISH,
         interfaceLanguage: Language? = null,
+        formality: com.example.conversationgenerator.data.model.Formality = com.example.conversationgenerator.data.model.Formality.CASUAL,
         difficulty: String = "intermediate",
         length: String = "medium"
     ): ApiResult<String> {
@@ -48,7 +49,7 @@ class ConversationRepository(
                 val prompt = when {
                     difficulty != "intermediate" -> PromptTemplates.generateWithDifficulty(situation, difficulty)
                     length != "medium" -> PromptTemplates.generateWithLength(situation, length)
-                    else -> PromptTemplates.generateConversationPrompt(situation, generationLanguage, interfaceLanguage, keySentence)
+                    else -> PromptTemplates.generateConversationPrompt(situation, generationLanguage, interfaceLanguage, keySentence, formality)
                 }
 
                 // Adjust max tokens based on whether translation is included

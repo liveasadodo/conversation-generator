@@ -13,6 +13,7 @@ data class ConversationEntity(
     val conversationText: String,
     val generationLanguage: String,
     val interfaceLanguage: String?,
+    val formality: String = "CASUAL",
     val timestamp: Long = System.currentTimeMillis(),
     val isFavorite: Boolean = false
 )

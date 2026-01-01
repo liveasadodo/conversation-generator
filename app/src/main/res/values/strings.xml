@@ -6,6 +6,7 @@
     <string name="title_main">Conversation Generator</string>
     <string name="label_generation_language">Generation Language</string>
     <string name="label_interface_language">Interface Language (for translation)</string>
+    <string name="label_formality">Formality</string>
     <string name="hint_situation">Enter a situation…</string>
     <string name="label_key_sentence">Key Sentence (Optional)</string>
     <string name="hint_key_sentence">Enter a sentence to include in the conversation…</string>
@@ -49,4 +50,10 @@
     <string name="error_tts_not_available">Text-to-speech not available</string>
     <string name="error_tts_language_not_available">Language data not installed for %s</string>
     <string name="message_tts_initializing">Initializing text-to-speech…</string>
+
+    <!-- Formality Levels -->
+    <string name="formality_formal">Formal</string>
+    <string name="formality_business_casual">Business Casual</string>
+    <string name="formality_casual">Casual</string>
+    <string name="formality_broken">Broken/Intimate</string>
 </resources>

@@ -1,17 +1,46 @@
 package com.example.conversationgenerator.util
 
+import com.example.conversationgenerator.data.model.Formality
 import com.example.conversationgenerator.data.model.Language
 
 object PromptTemplates {
+
+    /**
+     * Get formality instruction based on formality level and language
+     */
+    fun getFormalityInstruction(formality: Formality, language: Language): String {
+        return when (formality) {
+            Formality.FORMAL -> when (language) {
+                Language.JAPANESE -> "- Use formal, polite language (敬語、謙譲語、丁寧語) appropriate for business or official settings with proper honorifics"
+                else -> "- Use formal, polite language appropriate for business or official settings with proper honorifics and respectful expressions"
+            }
+            Formality.BUSINESS_CASUAL -> when (language) {
+                Language.JAPANESE -> "- Use professional but friendly language (丁寧語中心) suitable for colleagues, balancing politeness with approachability"
+                else -> "- Use professional but friendly language suitable for colleagues, balancing politeness with approachability"
+            }
+            Formality.CASUAL -> when (language) {
+                Language.JAPANESE -> "- Use everyday conversational language (普通の会話) between friends or acquaintances with natural, relaxed tone"
+                else -> "- Use everyday conversational language between friends or acquaintances with natural, relaxed tone"
+            }
+            Formality.BROKEN -> when (language) {
+                Language.JAPANESE -> "- Use very casual, intimate language (砕けた表現、若者言葉) between close friends or family with colloquialisms and slang"
+                else -> "- Use very casual, intimate language between close friends or family with colloquialisms, slang, and informal expressions"
+            }
+        }
+    }
+
+
     fun generateConversationPrompt(
         situation: String,
         generationLanguage: Language = Language.ENGLISH,
         interfaceLanguage: Language? = null,
-        keySentence: String? = null
+        keySentence: String? = null,
+        formality: Formality = Formality.CASUAL
     ): String {
         val languageName = generationLanguage.displayName
         val includeTranslation = interfaceLanguage != null && interfaceLanguage != generationLanguage
         val hasKeySentence = !keySentence.isNullOrBlank()
+        val formalityInstruction = getFormalityInstruction(formality, generationLanguage)
 
         return when {
             includeTranslation && hasKeySentence -> {
@@ -20,7 +49,7 @@ object PromptTemplates {
 
                     Requirements:
                     - Conversation should consist of 2-3 exchanges
-                    - Use practical and natural expressions
+                    $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
                     - IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues
@@ -46,7 +75,7 @@ object PromptTemplates {
 
                     Requirements:
                     - Conversation should consist of 2-3 exchanges
-                    - Use practical and natural expressions
+                    $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
 
@@ -70,7 +99,7 @@ object PromptTemplates {
 
                     Requirements:
                     - Conversation should consist of 2-3 exchanges
-                    - Use practical and natural expressions
+                    $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
                     - IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues
@@ -91,7 +120,7 @@ object PromptTemplates {
 
                     Requirements:
                     - Conversation should consist of 2-3 exchanges
-                    - Use practical and natural expressions
+                    $formalityInstruction
                     - Clearly distinguish each speaker's dialogue
                     - Include appropriate greetings and closing
 

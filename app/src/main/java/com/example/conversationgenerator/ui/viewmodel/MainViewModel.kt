@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.conversationgenerator.data.model.ApiResult
+import com.example.conversationgenerator.data.model.Formality
 import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.repository.ConversationRepository
 import com.example.conversationgenerator.util.InputValidator
@@ -27,12 +28,19 @@ class MainViewModel(
     private val _interfaceLanguage = MutableLiveData<Language>(Language.JAPANESE)
     val interfaceLanguage: LiveData<Language> = _interfaceLanguage
 
+    private val _formality = MutableLiveData<Formality>(Formality.CASUAL)
+    val formality: LiveData<Formality> = _formality
+
     fun setGenerationLanguage(language: Language) {
         _generationLanguage.value = language
     }
 
     fun setInterfaceLanguage(language: Language) {
         _interfaceLanguage.value = language
+    }
+
+    fun setFormality(formality: Formality) {
+        _formality.value = formality
     }
 
     fun generateConversation(
@@ -53,6 +61,7 @@ class MainViewModel(
                         keySentence = keySentence,
                         generationLanguage = _generationLanguage.value ?: Language.ENGLISH,
                         interfaceLanguage = _interfaceLanguage.value,
+                        formality = _formality.value ?: Formality.CASUAL,
                         difficulty = difficulty,
                         length = length
                     )

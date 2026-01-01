@@ -22,12 +22,21 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Settings persist across sessions
 - Automatic translation when generation ≠ interface language
 
-### 4. Conversation Generation
+### 4. Formality Level Selection
+- **Formality**: Select the formality level of the conversation
+  - **Formal**: Polite, professional language for business or official settings (honorifics, respectful expressions)
+  - **Business Casual**: Professional but friendly language for colleagues (balanced politeness)
+  - **Casual**: Everyday conversational language between friends (natural, relaxed tone)
+  - **Broken/Intimate**: Very casual language for close friends/family (colloquialisms, slang, informal expressions)
+- Default: Casual
+- Settings persist across sessions
+
+### 5. Conversation Generation
 - Generates 2-3 exchange conversations using Gemini API
 - Two-column layout: Original (left) and Translation (right) when translation enabled
 - Loading indicator during generation
 
-### 5. Text-to-Speech
+### 6. Text-to-Speech
 - Android TextToSpeech API for audio playback
 - Speaker button next to each dialogue line
 - Play/Stop toggle with visual feedback
@@ -35,7 +44,7 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Supports all 8 generation languages
 - Offline capable (when language data installed)
 
-### 6. Conversation History
+### 7. Conversation History
 - Local storage using Room database
 - Stores last 30 conversations
 - Auto-delete oldest when limit exceeded
@@ -44,7 +53,7 @@ Conversation Generator is an Android app that generates multilingual conversatio
 - Delete individual conversations
 - View historical conversation details
 
-### 7. Output Management
+### 8. Output Management
 - Copy to clipboard
 - Share via Android share menu
 
@@ -74,6 +83,15 @@ Additional constraint: Must naturally include the key sentence: {keySentence}
 ```
 Additional instruction: Provide {interfaceLanguage} translations marked with [TRANSLATION]
 Max tokens increased to 2048
+```
+
+**With Formality:**
+```
+Additional instruction based on formality level:
+- Formal: Use formal, polite language with honorifics and respectful expressions
+- Business Casual: Use professional but friendly language suitable for colleagues
+- Casual: Use everyday conversational language with natural, relaxed tone
+- Broken: Use very casual, intimate language with colloquialisms and slang
 ```
 
 #### Generation Config
@@ -121,6 +139,16 @@ enum class Language(val displayName: String, val code: String) {
 }
 ```
 
+**Formality Enum:**
+```kotlin
+enum class Formality(val displayNameEn: String, val displayNameJa: String) {
+    FORMAL("Formal", "フォーマル"),
+    BUSINESS_CASUAL("Business Casual", "ビジネスカジュアル"),
+    CASUAL("Casual", "カジュアル"),
+    BROKEN("Broken/Intimate", "ブロークン")
+}
+```
+
 **Database Entity:**
 ```kotlin
 @Entity(tableName = "conversations")
@@ -133,6 +161,7 @@ data class ConversationEntity(
     val conversationText: String,
     val generationLanguage: String,
     val interfaceLanguage: String?,
+    val formality: String = "CASUAL",
     val timestamp: Long = System.currentTimeMillis(),
     val isFavorite: Boolean = false
 )
@@ -166,9 +195,10 @@ data class ConversationEntity(
 2. Language selection (generation, interface)
 3. Situation input
 4. Key sentence input (optional, collapsible)
-5. Action buttons (Generate, Clear)
-6. Result display with speaker buttons
-7. Copy/Share buttons
+5. Formality selection (spinner above action buttons)
+6. Action buttons (Generate, Clear)
+7. Result display with speaker buttons
+8. Copy/Share buttons
 
 **History Screen:**
 1. Filter toggle (All/Favorites)

@@ -18,6 +18,7 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 import com.example.conversationgenerator.data.api.RetrofitClient
 import com.example.conversationgenerator.data.model.ApiResult
+import com.example.conversationgenerator.data.model.Formality
 import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.repository.ConversationRepository
 import com.example.conversationgenerator.databinding.ActivityMainBinding
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         private const val PREFS_LANGUAGE = "language_prefs"
         private const val KEY_GENERATION_LANGUAGE = "generation_language"
         private const val KEY_INTERFACE_LANGUAGE = "interface_language"
+        private const val KEY_FORMALITY = "formality"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -272,6 +274,34 @@ class MainActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
+        // Setup Formality Spinner
+        val formalities = Formality.getAllFormalities()
+        val savedFormalityName = languagePrefs.getString(KEY_FORMALITY, Formality.CASUAL.name)
+        val currentInterfaceLanguage = viewModel.interfaceLanguage.value ?: Language.JAPANESE
+
+        val formalityAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            formalities.map { it.getDisplayName(currentInterfaceLanguage) }
+        )
+        formalityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.formalitySpinner.adapter = formalityAdapter
+
+        // Set saved formality or default to Casual
+        val savedFormalityIndex = formalities.indexOfFirst { it.name == savedFormalityName }
+        binding.formalitySpinner.setSelection(if (savedFormalityIndex >= 0) savedFormalityIndex else 2) // CASUAL is index 2
+
+        binding.formalitySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedFormality = formalities[position]
+                viewModel.setFormality(selectedFormality)
+                // Save preference
+                languagePrefs.edit().putString(KEY_FORMALITY, selectedFormality.name).apply()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     private fun observeViewModel() {
@@ -425,6 +455,7 @@ class MainActivity : AppCompatActivity() {
             val title = parsedConversation?.title ?: "Conversation"
             val genLang = viewModel.generationLanguage.value?.displayName ?: "English"
             val intLang = viewModel.interfaceLanguage.value?.displayName
+            val formalityName = viewModel.formality.value?.name ?: Formality.CASUAL.name
 
             historyRepository.saveConversation(
                 title = title,
@@ -432,7 +463,8 @@ class MainActivity : AppCompatActivity() {
                 keySentence = currentKeySentence,
                 conversationText = conversationText,
                 generationLanguage = genLang,
-                interfaceLanguage = intLang
+                interfaceLanguage = intLang,
+                formality = formalityName
             )
         }
     }

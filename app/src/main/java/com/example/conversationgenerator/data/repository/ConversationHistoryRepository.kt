@@ -24,7 +24,8 @@ class ConversationHistoryRepository(
         keySentence: String?,
         conversationText: String,
         generationLanguage: String,
-        interfaceLanguage: String?
+        interfaceLanguage: String?,
+        formality: String = "CASUAL"
     ): Long {
         return withContext(ioDispatcher) {
             val conversation = ConversationEntity(
@@ -33,7 +34,8 @@ class ConversationHistoryRepository(
                 keySentence = keySentence,
                 conversationText = conversationText,
                 generationLanguage = generationLanguage,
-                interfaceLanguage = interfaceLanguage
+                interfaceLanguage = interfaceLanguage,
+                formality = formality
             )
 
             val conversationId = conversationDao.insertConversation(conversation)

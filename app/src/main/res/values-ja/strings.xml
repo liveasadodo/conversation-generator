@@ -6,6 +6,7 @@
     <string name="title_main">会話文ジェネレーター</string>
     <string name="label_generation_language">生成言語</string>
     <string name="label_interface_language">利用言語（翻訳用）</string>
+    <string name="label_formality">フォーマリティ</string>
     <string name="hint_situation">状況を入力してください…</string>
     <string name="label_key_sentence">キーセンテンス（任意）</string>
     <string name="hint_key_sentence">会話に含めたい文を入力してください…</string>
@@ -49,4 +50,10 @@
     <string name="error_tts_not_available">音声合成機能が利用できません</string>
     <string name="error_tts_language_not_available">%s の音声データがインストールされていません</string>
     <string name="message_tts_initializing">音声合成を初期化中…</string>
+
+    <!-- Formality Levels -->
+    <string name="formality_formal">フォーマル</string>
+    <string name="formality_business_casual">ビジネスカジュアル</string>
+    <string name="formality_casual">カジュアル</string>
+    <string name="formality_broken">ブロークン</string>
 </resources>
