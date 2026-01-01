@@ -43,4 +43,10 @@
     <string name="dialog_delete_title">会話を削除</string>
     <string name="dialog_delete_message">この会話を削除してもよろしいですか？</string>
     <string name="button_cancel">キャンセル</string>
+
+    <!-- Text-to-Speech -->
+    <string name="button_speak">音声再生</string>
+    <string name="error_tts_not_available">音声合成機能が利用できません</string>
+    <string name="error_tts_language_not_available">%s の音声データがインストールされていません</string>
+    <string name="message_tts_initializing">音声合成を初期化中…</string>
 </resources>

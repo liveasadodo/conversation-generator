@@ -5,15 +5,35 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-    <!-- Speaker Label -->
-    <TextView
-        android:id="@+id/speakerLabel"
-        android:layout_width="wrap_content"
+    <!-- Header with Speaker Label and Play Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="14sp"
-        android:textColor="?attr/colorPrimary"
-        android:layout_marginBottom="4dp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+
+        <!-- Speaker Label -->
+        <TextView
+            android:id="@+id/speakerLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="?attr/colorPrimary" />
+
+        <!-- Play/Stop Button -->
+        <ImageButton
+            android:id="@+id/speakButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_lock_silent_mode_off"
+            android:contentDescription="@string/button_speak"
+            android:scaleType="fitCenter"
+            android:padding="4dp" />
+    </LinearLayout>
 
     <!-- Two-column layout for original and translation -->
     <LinearLayout

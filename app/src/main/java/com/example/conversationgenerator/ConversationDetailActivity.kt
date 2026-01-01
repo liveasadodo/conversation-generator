@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.conversationgenerator.data.database.ConversationDatabase
+import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.repository.ConversationHistoryRepository
 import com.example.conversationgenerator.databinding.ActivityConversationDetailBinding
 import com.example.conversationgenerator.util.ConversationParser
@@ -18,12 +19,18 @@ import kotlinx.coroutines.launch
 class ConversationDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConversationDetailBinding
+    private lateinit var ttsManager: com.example.conversationgenerator.util.TTSManager
     private var parsedConversation: com.example.conversationgenerator.util.ParsedConversation? = null
+    private var generationLanguage: Language = Language.ENGLISH
+    private var currentPlayingButton: android.widget.ImageButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityConversationDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize TTS
+        ttsManager = com.example.conversationgenerator.util.TTSManager(this)
 
         val conversationId = intent.getLongExtra("CONVERSATION_ID", -1)
         if (conversationId == -1L) {
@@ -43,6 +50,8 @@ class ConversationDetailActivity : AppCompatActivity() {
             val conversation = repository.getConversationById(conversationId)
             if (conversation != null) {
                 binding.titleTextView.text = conversation.title
+                // Get generation language from saved conversation
+                generationLanguage = Language.fromDisplayName(conversation.generationLanguage)
                 displayConversation(conversation.conversationText)
             } else {
                 Toast.makeText(this@ConversationDetailActivity, "Conversation not found", Toast.LENGTH_SHORT).show()
@@ -70,6 +79,7 @@ class ConversationDetailActivity : AppCompatActivity() {
             val translationText = lineView.findViewById<TextView>(R.id.translationText)
             val translationContainer = lineView.findViewById<android.view.View>(R.id.translationContainer)
             val singleText = lineView.findViewById<TextView>(R.id.singleText)
+            val speakButton = lineView.findViewById<android.widget.ImageButton>(R.id.speakButton)
 
             speakerLabel.text = line.speaker
 
@@ -84,6 +94,11 @@ class ConversationDetailActivity : AppCompatActivity() {
                 translationContainer.visibility = android.view.View.GONE
                 singleText.visibility = android.view.View.VISIBLE
                 singleText.text = line.originalText
+            }
+
+            // Setup speaker button
+            speakButton.setOnClickListener {
+                handleSpeakButtonClick(speakButton, line.originalText)
             }
 
             binding.conversationContainer.addView(lineView)
@@ -131,5 +146,45 @@ class ConversationDetailActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_SUBJECT, parsedConversation?.title ?: "Conversation")
         }
         startActivity(Intent.createChooser(intent, getString(R.string.button_share)))
+    }
+
+    private fun handleSpeakButtonClick(button: android.widget.ImageButton, text: String) {
+        if (ttsManager.isSpeaking() && currentPlayingButton == button) {
+            // Stop if already playing this line
+            ttsManager.stop()
+            button.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+            currentPlayingButton = null
+        } else {
+            // Stop any currently playing
+            if (currentPlayingButton != null) {
+                currentPlayingButton?.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+            }
+
+            // Start playing new line
+            val success = ttsManager.speak(text, generationLanguage)
+            if (success) {
+                button.setImageResource(android.R.drawable.ic_lock_silent_mode)
+                currentPlayingButton = button
+
+                // Reset button icon when speech finishes
+                button.postDelayed({
+                    if (currentPlayingButton == button && !ttsManager.isSpeaking()) {
+                        button.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+                        currentPlayingButton = null
+                    }
+                }, 100)
+            } else {
+                Toast.makeText(
+                    this,
+                    getString(R.string.error_tts_language_not_available, generationLanguage.displayName),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        ttsManager.shutdown()
+        super.onDestroy()
     }
 }

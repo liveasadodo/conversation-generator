@@ -49,6 +49,19 @@ Conversation Generator is an Android application that generates multilingual con
 - Share conversation via Android share menu
 - Display success/error messages appropriately
 
+### 5. Text-to-Speech (Audio Playback)
+- **Audio playback for each conversation line** using Android TextToSpeech API
+- **Speaker button** displayed next to each dialogue line
+- **Automatic language detection**: TTS uses the generation language for pronunciation
+- **Playback controls**:
+  - Play/Stop toggle on each line
+  - Visual feedback during playback (icon change)
+  - Automatic stop when switching to another line
+- **Multi-language support**: All 8 generation languages supported
+  - English, Japanese, Spanish, French, German, Chinese, Korean, Hindi
+- **Offline capability**: Works when language data is installed on device
+- **Fallback handling**: Graceful error messages if language not available
+
 ## Technical Specifications
 
 ### API Integration
@@ -339,9 +352,24 @@ data class UsageMetadata(
    - Clear button (secondary action)
 5. **Result Section**:
    - ScrollView for generated conversation
-   - When translation enabled: Display both original and translation in two-column layout
+   - Each conversation line displays:
+     - Speaker label
+     - Original text (and translation if enabled) in two-column layout
+     - **Speaker button** (icon) for audio playback
    - Copy and Share buttons
 6. **Loading State**: Progress indicator overlay
+
+#### Text-to-Speech UI
+- **Speaker Icon**: Material icon next to each conversation line
+- **State Indicators**:
+  - Default: Volume icon (not playing)
+  - Playing: Volume up icon or animated indicator
+  - Error: Volume off icon (language not available)
+- **Button Behavior**:
+  - Tap to play the original text in generation language
+  - Tap again to stop playback
+  - Playing stops automatically when line finishes
+  - Only one line plays at a time
 
 #### States
 - **Initial**: Empty input, generate button enabled

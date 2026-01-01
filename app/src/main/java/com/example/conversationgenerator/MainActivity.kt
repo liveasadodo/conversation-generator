@@ -31,10 +31,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
     private lateinit var historyRepository: com.example.conversationgenerator.data.repository.ConversationHistoryRepository
+    private lateinit var ttsManager: com.example.conversationgenerator.util.TTSManager
     private var generatedConversation: String = ""
     private var parsedConversation: com.example.conversationgenerator.util.ParsedConversation? = null
     private var currentSituation: String = ""
     private var currentKeySentence: String? = null
+    private var currentPlayingButton: android.widget.ImageButton? = null
 
     companion object {
         private const val PREFS_NAME = "api_keys"
@@ -55,6 +57,9 @@ class MainActivity : AppCompatActivity() {
         // Initialize history repository
         val database = com.example.conversationgenerator.data.database.ConversationDatabase.getDatabase(this)
         historyRepository = com.example.conversationgenerator.data.repository.ConversationHistoryRepository(database.conversationDao())
+
+        // Initialize TTS
+        ttsManager = com.example.conversationgenerator.util.TTSManager(this)
 
         // Check for API key
         val apiKey = getApiKey()
@@ -333,6 +338,7 @@ class MainActivity : AppCompatActivity() {
             val translationText = lineView.findViewById<TextView>(R.id.translationText)
             val translationContainer = lineView.findViewById<View>(R.id.translationContainer)
             val singleText = lineView.findViewById<TextView>(R.id.singleText)
+            val speakButton = lineView.findViewById<android.widget.ImageButton>(R.id.speakButton)
 
             speakerLabel.text = line.speaker
 
@@ -347,6 +353,11 @@ class MainActivity : AppCompatActivity() {
                 translationContainer.visibility = View.GONE
                 singleText.visibility = View.VISIBLE
                 singleText.text = line.originalText
+            }
+
+            // Setup speaker button
+            speakButton.setOnClickListener {
+                handleSpeakButtonClick(speakButton, line.originalText)
             }
 
             binding.conversationContainer.addView(lineView)
@@ -424,5 +435,48 @@ class MainActivity : AppCompatActivity() {
                 interfaceLanguage = intLang
             )
         }
+    }
+
+    private fun handleSpeakButtonClick(button: android.widget.ImageButton, text: String) {
+        val generationLanguage = viewModel.generationLanguage.value ?: Language.ENGLISH
+
+        if (ttsManager.isSpeaking() && currentPlayingButton == button) {
+            // Stop if already playing this line
+            ttsManager.stop()
+            button.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+            currentPlayingButton = null
+        } else {
+            // Stop any currently playing
+            if (currentPlayingButton != null) {
+                currentPlayingButton?.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+            }
+
+            // Start playing new line
+            val success = ttsManager.speak(text, generationLanguage)
+            if (success) {
+                button.setImageResource(android.R.drawable.ic_lock_silent_mode)
+                currentPlayingButton = button
+
+                // Reset button icon when speech finishes
+                // Note: This is a simple approach; more sophisticated handling could use UtteranceProgressListener
+                button.postDelayed({
+                    if (currentPlayingButton == button && !ttsManager.isSpeaking()) {
+                        button.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+                        currentPlayingButton = null
+                    }
+                }, 100)
+            } else {
+                Toast.makeText(
+                    this,
+                    getString(R.string.error_tts_language_not_available, generationLanguage.displayName),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        ttsManager.shutdown()
+        super.onDestroy()
     }
 }

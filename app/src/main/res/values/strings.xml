@@ -43,4 +43,10 @@
     <string name="dialog_delete_title">Delete Conversation</string>
     <string name="dialog_delete_message">Are you sure you want to delete this conversation?</string>
     <string name="button_cancel">Cancel</string>
+
+    <!-- Text-to-Speech -->
+    <string name="button_speak">Play audio</string>
+    <string name="error_tts_not_available">Text-to-speech not available</string>
+    <string name="error_tts_language_not_available">Language data not installed for %s</string>
+    <string name="message_tts_initializing">Initializing text-to-speech…</string>
 </resources>
