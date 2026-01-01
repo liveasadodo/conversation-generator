@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +21,7 @@ import com.example.conversationgenerator.data.repository.ConversationRepository
 import com.example.conversationgenerator.databinding.ActivityMainBinding
 import com.example.conversationgenerator.ui.viewmodel.MainViewModel
 import com.example.conversationgenerator.ui.viewmodel.MainViewModelFactory
+import com.example.conversationgenerator.util.ConversationParser
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
     private var generatedConversation: String = ""
+    private var parsedConversation: com.example.conversationgenerator.util.ParsedConversation? = null
 
     companion object {
         private const val PREFS_NAME = "api_keys"
@@ -288,7 +291,44 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayResult(conversation: String) {
         binding.resultCard.visibility = View.VISIBLE
-        binding.resultTextView.text = conversation
+
+        // Parse the conversation
+        parsedConversation = ConversationParser.parse(conversation)
+
+        // Display title
+        binding.conversationTitle.text = parsedConversation?.title ?: ""
+        binding.conversationTitle.visibility = if (parsedConversation?.title?.isNotEmpty() == true) View.VISIBLE else View.GONE
+
+        // Clear previous content
+        binding.conversationContainer.removeAllViews()
+
+        // Add conversation lines
+        parsedConversation?.lines?.forEach { line ->
+            val lineView = layoutInflater.inflate(R.layout.item_conversation_line, binding.conversationContainer, false)
+
+            val speakerLabel = lineView.findViewById<TextView>(R.id.speakerLabel)
+            val originalText = lineView.findViewById<TextView>(R.id.originalText)
+            val translationText = lineView.findViewById<TextView>(R.id.translationText)
+            val translationContainer = lineView.findViewById<View>(R.id.translationContainer)
+            val singleText = lineView.findViewById<TextView>(R.id.singleText)
+
+            speakerLabel.text = line.speaker
+
+            if (line.translationText != null) {
+                // Show two-column layout
+                translationContainer.visibility = View.VISIBLE
+                singleText.visibility = View.GONE
+                originalText.text = line.originalText
+                translationText.text = line.translationText
+            } else {
+                // Show single column layout
+                translationContainer.visibility = View.GONE
+                singleText.visibility = View.VISIBLE
+                singleText.text = line.originalText
+            }
+
+            binding.conversationContainer.addView(lineView)
+        }
     }
 
     private fun showError(message: String) {
@@ -318,16 +358,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun copyToClipboard(text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("Conversation", text)
+
+        // Use formatted version if parsed conversation is available
+        val textToCopy = if (parsedConversation != null) {
+            ConversationParser.formatForCopy(parsedConversation!!)
+        } else {
+            text
+        }
+
+        val clip = ClipData.newPlainText("Conversation", textToCopy)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.message_copied, Toast.LENGTH_SHORT).show()
     }
 
     private fun shareConversation(text: String) {
+        // Use formatted version if parsed conversation is available
+        val textToShare = if (parsedConversation != null) {
+            ConversationParser.formatForCopy(parsedConversation!!)
+        } else {
+            text
+        }
+
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, text)
-            putExtra(Intent.EXTRA_SUBJECT, "English Conversation")
+            putExtra(Intent.EXTRA_TEXT, textToShare)
+            putExtra(Intent.EXTRA_SUBJECT, parsedConversation?.title ?: "Conversation")
         }
         startActivity(Intent.createChooser(intent, getString(R.string.button_share)))
     }

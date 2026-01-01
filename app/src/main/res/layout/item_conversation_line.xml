@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Speaker Label -->
+    <TextView
+        android:id="@+id/speakerLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textColor="?attr/colorPrimary"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Two-column layout for original and translation -->
+    <LinearLayout
+        android:id="@+id/translationContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:visibility="gone">
+
+        <!-- Original text (left column) -->
+        <TextView
+            android:id="@+id/originalText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnSurface"
+            android:paddingEnd="8dp"
+            android:paddingRight="8dp" />
+
+        <!-- Translation text (right column) -->
+        <TextView
+            android:id="@+id/translationText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:paddingStart="8dp"
+            android:paddingLeft="8dp" />
+    </LinearLayout>
+
+    <!-- Single column layout (when no translation) -->
+    <TextView
+        android:id="@+id/singleText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="?attr/colorOnSurface"
+        android:visibility="gone" />
+
+</LinearLayout>

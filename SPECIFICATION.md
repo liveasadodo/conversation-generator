@@ -30,6 +30,8 @@ Conversation Generator is an Android application that generates multilingual con
 - Conversations consist of 2-3 exchanges
 - Display generated conversation in readable format
 - Optionally display translation in interface language (when different from generation language)
+  - **Two-column layout**: Original sentence on the left, translation on the right (when translation is enabled)
+  - Each dialogue line is displayed side-by-side for easy comparison
 - Loading indicator during generation
 
 ### 4. Output Management

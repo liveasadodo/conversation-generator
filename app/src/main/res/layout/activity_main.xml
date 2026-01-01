@@ -41,39 +41,57 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:baselineAligned="false">
 
-            <!-- Generation Language Spinner -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Generation Language Column -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/label_generation_language"
-                android:textSize="12sp"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp">
 
-            <Spinner
-                android:id="@+id/generationLanguageSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:minHeight="48dp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_generation_language"
+                    android:textSize="12sp"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
-            <!-- Interface Language Spinner -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_interface_language"
-                android:textSize="12sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="16dp" />
+                <Spinner
+                    android:id="@+id/generationLanguageSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:minHeight="48dp" />
+            </LinearLayout>
 
-            <Spinner
-                android:id="@+id/interfaceLanguageSpinner"
-                android:layout_width="match_parent"
+            <!-- Interface Language Column -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:minHeight="48dp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_interface_language"
+                    android:textSize="12sp"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <Spinner
+                    android:id="@+id/interfaceLanguageSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:minHeight="48dp" />
+            </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -224,25 +242,34 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface" />
 
+            <!-- Conversation Title -->
+            <TextView
+                android:id="@+id/conversationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:visibility="gone"
+                tools:text="At a Restaurant"
+                tools:visibility="visible" />
+
             <!-- Result Text -->
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="250dp"
                 android:maxHeight="500dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:background="?attr/colorSurfaceContainerHighest"
                 android:padding="12dp">
 
-                <TextView
-                    android:id="@+id/resultTextView"
+                <LinearLayout
+                    android:id="@+id/conversationContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:lineSpacingExtra="4dp"
-                    android:fontFamily="monospace"
-                    tools:text="**At a Restaurant**\n\nWaiter: Good evening!\nCustomer: Hello!" />
+                    android:orientation="vertical" />
             </ScrollView>
 
             <!-- Result Action Buttons -->

@@ -23,15 +23,16 @@ object PromptTemplates {
 
                 Situation: $situation
 
-                Format:
+                Format (IMPORTANT - Follow this exact format):
                 **Title**
 
-                Speaker A: ... (in $languageName)
-                (${interfaceLanguage!!.displayName} translation: ...)
-                Speaker B: ... (in $languageName)
-                (${interfaceLanguage.displayName} translation: ...)
+                Speaker A: [original $languageName sentence]
+                [TRANSLATION]: [${interfaceLanguage!!.displayName} translation]
 
-                Provide the conversation in $languageName with ${interfaceLanguage.displayName} translations in parentheses after each line.
+                Speaker B: [original $languageName sentence]
+                [TRANSLATION]: [${interfaceLanguage.displayName} translation]
+
+                CRITICAL: Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation.
             """.trimIndent()
         } else {
             """
