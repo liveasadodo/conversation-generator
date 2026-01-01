@@ -66,6 +66,37 @@
                     android:textColor="?attr/colorPrimary"
                     tools:text="At a Restaurant" />
 
+                <!-- Metadata: Key Sentence and Formality -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical">
+
+                    <!-- Key Sentence (optional) -->
+                    <TextView
+                        android:id="@+id/keySentenceLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="italic"
+                        android:visibility="gone"
+                        tools:text="Key: I'd like to order..." />
+
+                    <!-- Formality -->
+                    <TextView
+                        android:id="@+id/formalityLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="?attr/colorSecondary"
+                        android:textStyle="bold"
+                        tools:text="Casual" />
+                </LinearLayout>
+
                 <!-- Result Text -->
                 <ScrollView
                     android:layout_width="match_parent"

@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.conversationgenerator.data.database.ConversationDatabase
+import com.example.conversationgenerator.data.model.Formality
 import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.repository.ConversationHistoryRepository
 import com.example.conversationgenerator.databinding.ActivityConversationDetailBinding
@@ -52,6 +53,24 @@ class ConversationDetailActivity : AppCompatActivity() {
                 binding.titleTextView.text = conversation.title
                 // Get generation language from saved conversation
                 generationLanguage = Language.fromDisplayName(conversation.generationLanguage)
+
+                // Display key sentence if present
+                if (!conversation.keySentence.isNullOrBlank()) {
+                    binding.keySentenceLabel.visibility = android.view.View.VISIBLE
+                    binding.keySentenceLabel.text = getString(R.string.label_key_sentence_display, conversation.keySentence)
+                } else {
+                    binding.keySentenceLabel.visibility = android.view.View.GONE
+                }
+
+                // Display formality
+                val formality = Formality.fromName(conversation.formality)
+                val currentLanguage = if (resources.configuration.locales[0].language == "ja") {
+                    Language.JAPANESE
+                } else {
+                    Language.ENGLISH
+                }
+                binding.formalityLabel.text = formality.getDisplayName(currentLanguage)
+
                 displayConversation(conversation.conversationText)
             } else {
                 Toast.makeText(this@ConversationDetailActivity, "Conversation not found", Toast.LENGTH_SHORT).show()

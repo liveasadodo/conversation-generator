@@ -56,4 +56,7 @@
     <string name="formality_business_casual">Business Casual</string>
     <string name="formality_casual">Casual</string>
     <string name="formality_broken">Broken/Intimate</string>
+
+    <!-- Display Labels -->
+    <string name="label_key_sentence_display">Key: %1$s</string>
 </resources>

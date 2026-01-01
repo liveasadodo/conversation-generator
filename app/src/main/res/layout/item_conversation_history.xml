@@ -62,12 +62,27 @@
             android:maxLines="2"
             tools:text="Ordering food at a restaurant" />
 
-        <!-- Languages and timestamp -->
+        <!-- Key Sentence (optional) -->
+        <TextView
+            android:id="@+id/keySentenceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="12sp"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="italic"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
+            tools:text="Key: I'd like to order..." />
+
+        <!-- Languages, formality and timestamp -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/languageInfo"
@@ -77,6 +92,16 @@
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 tools:text="English → 日本語" />
+
+            <TextView
+                android:id="@+id/formalityText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:textSize="12sp"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold"
+                tools:text="Casual" />
 
             <TextView
                 android:id="@+id/timestampText"

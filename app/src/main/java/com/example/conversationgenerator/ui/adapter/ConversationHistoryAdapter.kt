@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.conversationgenerator.R
 import com.example.conversationgenerator.data.database.ConversationEntity
+import com.example.conversationgenerator.data.model.Formality
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,7 +36,9 @@ class ConversationHistoryAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleText: TextView = itemView.findViewById(R.id.titleText)
         private val situationText: TextView = itemView.findViewById(R.id.situationText)
+        private val keySentenceText: TextView = itemView.findViewById(R.id.keySentenceText)
         private val languageInfo: TextView = itemView.findViewById(R.id.languageInfo)
+        private val formalityText: TextView = itemView.findViewById(R.id.formalityText)
         private val timestampText: TextView = itemView.findViewById(R.id.timestampText)
         private val favoriteButton: ImageButton = itemView.findViewById(R.id.favoriteButton)
         private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
@@ -44,6 +47,14 @@ class ConversationHistoryAdapter(
             titleText.text = conversation.title
             situationText.text = conversation.situation
 
+            // Show key sentence if present
+            if (!conversation.keySentence.isNullOrBlank()) {
+                keySentenceText.visibility = View.VISIBLE
+                keySentenceText.text = itemView.context.getString(R.string.label_key_sentence_display, conversation.keySentence)
+            } else {
+                keySentenceText.visibility = View.GONE
+            }
+
             // Format language info
             val langInfo = if (conversation.interfaceLanguage != null && conversation.interfaceLanguage != conversation.generationLanguage) {
                 "${conversation.generationLanguage} → ${conversation.interfaceLanguage}"
@@ -51,6 +62,15 @@ class ConversationHistoryAdapter(
                 conversation.generationLanguage
             }
             languageInfo.text = langInfo
+
+            // Show formality
+            val formality = Formality.fromName(conversation.formality)
+            val currentLanguage = if (Locale.getDefault().language == "ja") {
+                com.example.conversationgenerator.data.model.Language.JAPANESE
+            } else {
+                com.example.conversationgenerator.data.model.Language.ENGLISH
+            }
+            formalityText.text = formality.getDisplayName(currentLanguage)
 
             // Format timestamp
             timestampText.text = formatTimestamp(conversation.timestamp)

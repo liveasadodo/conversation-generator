@@ -56,4 +56,7 @@
     <string name="formality_business_casual">ビジネスカジュアル</string>
     <string name="formality_casual">カジュアル</string>
     <string name="formality_broken">ブロークン</string>
+
+    <!-- Display Labels -->
+    <string name="label_key_sentence_display">キー: %1$s</string>
 </resources>
