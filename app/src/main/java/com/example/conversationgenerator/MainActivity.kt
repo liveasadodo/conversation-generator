@@ -23,6 +23,7 @@ import com.example.conversationgenerator.data.model.Formality
 import com.example.conversationgenerator.data.model.Language
 import com.example.conversationgenerator.data.repository.ConversationRepository
 import com.example.conversationgenerator.databinding.ActivityMainBinding
+import com.example.conversationgenerator.ui.adapter.LanguageSpinnerAdapter
 import com.example.conversationgenerator.ui.viewmodel.MainViewModel
 import com.example.conversationgenerator.ui.viewmodel.MainViewModelFactory
 import com.example.conversationgenerator.util.ConversationParser
@@ -85,8 +86,7 @@ class MainActivity : AppCompatActivity() {
 
         val config = Configuration(resources.configuration)
         config.setLocale(locale)
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
+        createConfigurationContext(config)
     }
 
     private fun changeLocale(language: Language) {
@@ -95,8 +95,7 @@ class MainActivity : AppCompatActivity() {
 
         val config = Configuration(resources.configuration)
         config.setLocale(locale)
-        @Suppress("DEPRECATION")
-        resources.updateConfiguration(config, resources.displayMetrics)
+        createConfigurationContext(config)
 
         // Recreate activity to apply new locale
         recreate()
@@ -171,15 +170,15 @@ class MainActivity : AppCompatActivity() {
 
         // Example chips click listeners
         binding.example1Chip.setOnClickListener {
-            binding.situationEditText.setText(R.string.example_1)
+            binding.situationEditText.setText(getString(R.string.example_1))
         }
 
         binding.example2Chip.setOnClickListener {
-            binding.situationEditText.setText(R.string.example_2)
+            binding.situationEditText.setText(getString(R.string.example_2))
         }
 
         binding.example3Chip.setOnClickListener {
-            binding.situationEditText.setText(R.string.example_3)
+            binding.situationEditText.setText(getString(R.string.example_3))
         }
 
         // Generate button
@@ -229,12 +228,7 @@ class MainActivity : AppCompatActivity() {
 
         // Setup Generation Language Spinner
         val generationLanguages = Language.getGenerationLanguages()
-        val generationAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            generationLanguages.map { it.displayName }
-        )
-        generationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val generationAdapter = LanguageSpinnerAdapter(this, generationLanguages)
         binding.generationLanguageSpinner.adapter = generationAdapter
 
         // Set saved language or default to English
@@ -254,12 +248,7 @@ class MainActivity : AppCompatActivity() {
 
         // Setup Interface Language Spinner
         val interfaceLanguages = Language.getInterfaceLanguages()
-        val interfaceAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            interfaceLanguages.map { it.displayName }
-        )
-        interfaceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val interfaceAdapter = LanguageSpinnerAdapter(this, interfaceLanguages)
         binding.interfaceLanguageSpinner.adapter = interfaceAdapter
 
         // Set saved language or default to Japanese

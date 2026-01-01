@@ -2,15 +2,15 @@ package com.example.conversationgenerator.data.model
 
 import java.util.Locale
 
-enum class Language(val displayName: String, val code: String) {
-    ENGLISH("English", "en"),
-    JAPANESE("日本語", "ja"),
-    SPANISH("Español", "es"),
-    FRENCH("Français", "fr"),
-    GERMAN("Deutsch", "de"),
-    CHINESE("中文", "zh"),
-    KOREAN("한국어", "ko"),
-    HINDI("हिन्दी", "hi");
+enum class Language(val displayName: String, val code: String, val flag: String) {
+    ENGLISH("English", "en", "🇺🇸"),
+    JAPANESE("日本語", "ja", "🇯🇵"),
+    SPANISH("Español", "es", "🇪🇸"),
+    FRENCH("Français", "fr", "🇫🇷"),
+    GERMAN("Deutsch", "de", "🇩🇪"),
+    CHINESE("中文", "zh", "🇨🇳"),
+    KOREAN("한국어", "ko", "🇰🇷"),
+    HINDI("हिन्दी", "hi", "🇮🇳");
 
     /**
      * Convert to Locale for TextToSpeech
