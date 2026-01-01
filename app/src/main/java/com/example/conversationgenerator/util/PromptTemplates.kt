@@ -59,22 +59,19 @@ object PromptTemplates {
                     Situation: $situation
                     Key Sentence: $keySentence
 
-                    Format (IMPORTANT - Follow this exact format):
-                    **Title**
-                    [TITLE_TRANSLATION]: [${interfaceLanguage!!.displayName} translation of title]
-
-                    Speaker A: [original $languageName sentence]
-                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker A"]
-                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
-
-                    Speaker B: [original $languageName sentence]
-                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker B"]
-                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
-
-                    CRITICAL:
-                    1. The title must be followed immediately by a line starting with "[TITLE_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
-                    2. Each speaker's name must be followed immediately by a line starting with "[SPEAKER_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
-                    3. Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
+                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
+                    {
+                      "title": "Conversation title in $languageName",
+                      "titleTranslation": "${interfaceLanguage!!.displayName} translation of title",
+                      "lines": [
+                        {
+                          "speaker": "Speaker name in $languageName",
+                          "speakerTranslation": "${interfaceLanguage.displayName} translation of speaker name",
+                          "text": "Dialogue text in $languageName",
+                          "translation": "${interfaceLanguage.displayName} translation of dialogue"
+                        }
+                      ]
+                    }
                 """.trimIndent()
             }
             includeTranslation -> {
@@ -90,22 +87,19 @@ object PromptTemplates {
 
                     Situation: $situation
 
-                    Format (IMPORTANT - Follow this exact format):
-                    **Title**
-                    [TITLE_TRANSLATION]: [${interfaceLanguage!!.displayName} translation of title]
-
-                    Speaker A: [original $languageName sentence]
-                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker A"]
-                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
-
-                    Speaker B: [original $languageName sentence]
-                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker B"]
-                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
-
-                    CRITICAL:
-                    1. The title must be followed immediately by a line starting with "[TITLE_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
-                    2. Each speaker's name must be followed immediately by a line starting with "[SPEAKER_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
-                    3. Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
+                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
+                    {
+                      "title": "Conversation title in $languageName",
+                      "titleTranslation": "${interfaceLanguage!!.displayName} translation of title",
+                      "lines": [
+                        {
+                          "speaker": "Speaker name in $languageName",
+                          "speakerTranslation": "${interfaceLanguage.displayName} translation of speaker name",
+                          "text": "Dialogue text in $languageName",
+                          "translation": "${interfaceLanguage.displayName} translation of dialogue"
+                        }
+                      ]
+                    }
                 """.trimIndent()
             }
             hasKeySentence -> {
@@ -123,11 +117,19 @@ object PromptTemplates {
                     Situation: $situation
                     Key Sentence: $keySentence
 
-                    Format:
-                    **Title**
-
-                    Speaker A: ...
-                    Speaker B: ...
+                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
+                    {
+                      "title": "Conversation title in $languageName",
+                      "titleTranslation": null,
+                      "lines": [
+                        {
+                          "speaker": "Speaker name in $languageName",
+                          "speakerTranslation": null,
+                          "text": "Dialogue text in $languageName",
+                          "translation": null
+                        }
+                      ]
+                    }
                 """.trimIndent()
             }
             else -> {
@@ -143,11 +145,19 @@ object PromptTemplates {
 
                     Situation: $situation
 
-                    Format:
-                    **Title**
-
-                    Speaker A: ...
-                    Speaker B: ...
+                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
+                    {
+                      "title": "Conversation title in $languageName",
+                      "titleTranslation": null,
+                      "lines": [
+                        {
+                          "speaker": "Speaker name in $languageName",
+                          "speakerTranslation": null,
+                          "text": "Dialogue text in $languageName",
+                          "translation": null
+                        }
+                      ]
+                    }
                 """.trimIndent()
             }
         }

@@ -1,5 +1,8 @@
 package com.example.conversationgenerator.util
 
+import org.json.JSONObject
+import org.json.JSONException
+
 data class ConversationLine(
     val speaker: String,
     val speakerTranslation: String? = null,
@@ -15,6 +18,69 @@ data class ParsedConversation(
 
 object ConversationParser {
     fun parse(rawText: String): ParsedConversation {
+        // First, try to parse as JSON
+        val cleanedText = cleanJsonResponse(rawText)
+        try {
+            return parseJson(cleanedText)
+        } catch (e: JSONException) {
+            // Fallback to old text-based parsing if JSON parsing fails
+            return parseText(rawText)
+        }
+    }
+
+    /**
+     * Remove markdown code blocks and other formatting that LLMs sometimes add
+     */
+    private fun cleanJsonResponse(rawText: String): String {
+        var cleaned = rawText.trim()
+
+        // Remove markdown code blocks (```json ... ``` or ``` ... ```)
+        if (cleaned.startsWith("```")) {
+            cleaned = cleaned.removePrefix("```json").removePrefix("```")
+            val endIndex = cleaned.lastIndexOf("```")
+            if (endIndex != -1) {
+                cleaned = cleaned.substring(0, endIndex)
+            }
+        }
+
+        return cleaned.trim()
+    }
+
+    /**
+     * Parse JSON format response
+     */
+    private fun parseJson(jsonText: String): ParsedConversation {
+        val jsonObject = JSONObject(jsonText)
+
+        val title = jsonObject.optString("title", "Conversation")
+        val titleTranslation = jsonObject.optString("titleTranslation").takeIf { it.isNotEmpty() && it != "null" }
+
+        val linesArray = jsonObject.getJSONArray("lines")
+        val conversationLines = mutableListOf<ConversationLine>()
+
+        for (i in 0 until linesArray.length()) {
+            val lineObj = linesArray.getJSONObject(i)
+            conversationLines.add(
+                ConversationLine(
+                    speaker = lineObj.getString("speaker"),
+                    speakerTranslation = lineObj.optString("speakerTranslation").takeIf { it.isNotEmpty() && it != "null" },
+                    originalText = lineObj.getString("text"),
+                    translationText = lineObj.optString("translation").takeIf { it.isNotEmpty() && it != "null" }
+                )
+            )
+        }
+
+        return ParsedConversation(
+            title = title,
+            titleTranslation = titleTranslation,
+            lines = conversationLines
+        )
+    }
+
+    /**
+     * Fallback text-based parsing for legacy format
+     */
+    private fun parseText(rawText: String): ParsedConversation {
         val lines = rawText.lines()
         var title = ""
         var titleTranslation: String? = null

@@ -82,10 +82,28 @@ Conversation Generator is an Android app that generates multilingual conversatio
 
 #### Request Formats
 
+**Response Format: JSON**
+All LLM responses must be in JSON format for stable parsing. The prompt instructs the model to respond with the following structure:
+
+```json
+{
+  "title": "Conversation title in generation language",
+  "titleTranslation": "Title in interface language (null if no translation)",
+  "lines": [
+    {
+      "speaker": "Speaker name in generation language",
+      "speakerTranslation": "Speaker name in interface language (null if no translation)",
+      "text": "Dialogue text in generation language",
+      "translation": "Dialogue text in interface language (null if no translation)"
+    }
+  ]
+}
+```
+
 **Standard Generation:**
 ```
 Prompt: Generate a natural {language} conversation with {length} exchanges for: {situation}
-Format: **Title**\nSpeaker A: ...\nSpeaker B: ...
+Response format: JSON (see above)
 Note: {length} exchanges means {length} pairs of Speaker A and Speaker B dialogue
 ```
 
@@ -96,7 +114,7 @@ Additional constraint: Must naturally include the key sentence: {keySentence}
 
 **With Translation:**
 ```
-Additional instruction: Provide {interfaceLanguage} translations marked with [TRANSLATION]
+Additional instruction: Provide {interfaceLanguage} translations in the JSON fields
 Max tokens increased to 2048
 ```
 
