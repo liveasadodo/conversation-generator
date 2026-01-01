@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls:*)",
-      "Bash(mkdir:*)",
-      "Bash(C:/Users/livea/android-sdk/platform-tools/adb.exe logcat -d)"
-    ]
-  }
-}
