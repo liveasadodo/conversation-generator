@@ -15,7 +15,7 @@
     <!-- Title -->
     <TextView
         android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/title_main"
         android:textSize="24sp"
@@ -23,8 +23,21 @@
         android:textColor="?attr/colorOnBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/historyButton"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp" />
+
+    <!-- History Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/historyButton"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_history"
+        app:layout_constraintTop_toTopOf="@id/titleTextView"
+        app:layout_constraintBottom_toBottomOf="@id/titleTextView"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        app:icon="@android:drawable/ic_menu_recent_history" />
 
     <!-- Language Selection Card -->
     <com.google.android.material.card.MaterialCardView

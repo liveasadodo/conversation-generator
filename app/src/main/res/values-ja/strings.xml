@@ -27,4 +27,17 @@
     <string name="example_1">レストランで注文する</string>
     <string name="example_2">道を尋ねる</string>
     <string name="example_3">ホテルでチェックインする</string>
+
+    <!-- History -->
+    <string name="title_history">会話履歴</string>
+    <string name="button_history">履歴</string>
+    <string name="button_filter_favorites">お気に入りのみ</string>
+    <string name="button_show_all">すべて表示</string>
+    <string name="message_no_conversations">会話履歴がありません</string>
+    <string name="message_no_favorites">お気に入りがありません</string>
+    <string name="message_deleted">会話を削除しました</string>
+    <string name="button_delete">削除</string>
+    <string name="dialog_delete_title">会話を削除</string>
+    <string name="dialog_delete_message">この会話を削除してもよろしいですか？</string>
+    <string name="button_cancel">キャンセル</string>
 </resources>

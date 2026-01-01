@@ -26,6 +26,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".ConversationDetailActivity"
+            android:exported="false"
+            android:parentActivityName=".HistoryActivity" />
     </application>
 
 </manifest>

@@ -13,7 +13,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import java.util.Locale
+import kotlinx.coroutines.launch
 import com.example.conversationgenerator.data.api.RetrofitClient
 import com.example.conversationgenerator.data.model.ApiResult
 import com.example.conversationgenerator.data.model.Language
@@ -28,8 +30,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
+    private lateinit var historyRepository: com.example.conversationgenerator.data.repository.ConversationHistoryRepository
     private var generatedConversation: String = ""
     private var parsedConversation: com.example.conversationgenerator.util.ParsedConversation? = null
+    private var currentSituation: String = ""
 
     companion object {
         private const val PREFS_NAME = "api_keys"
@@ -46,6 +50,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize history repository
+        val database = com.example.conversationgenerator.data.database.ConversationDatabase.getDatabase(this)
+        historyRepository = com.example.conversationgenerator.data.repository.ConversationHistoryRepository(database.conversationDao())
 
         // Check for API key
         val apiKey = getApiKey()
@@ -163,7 +171,14 @@ class MainActivity : AppCompatActivity() {
         // Generate button
         binding.generateButton.setOnClickListener {
             val situation = binding.situationEditText.text.toString()
+            currentSituation = situation
             viewModel.generateConversation(situation)
+        }
+
+        // History button
+        binding.historyButton.setOnClickListener {
+            val intent = Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
         }
 
         // Clear button
@@ -261,6 +276,9 @@ class MainActivity : AppCompatActivity() {
                     showLoading(false)
                     generatedConversation = result.data
                     displayResult(result.data)
+
+                    // Save to history
+                    saveConversationToHistory(result.data)
                 }
                 is ApiResult.Error -> {
                     showLoading(false)
@@ -385,5 +403,21 @@ class MainActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_SUBJECT, parsedConversation?.title ?: "Conversation")
         }
         startActivity(Intent.createChooser(intent, getString(R.string.button_share)))
+    }
+
+    private fun saveConversationToHistory(conversationText: String) {
+        lifecycleScope.launch {
+            val title = parsedConversation?.title ?: "Conversation"
+            val genLang = viewModel.generationLanguage.value?.displayName ?: "English"
+            val intLang = viewModel.interfaceLanguage.value?.displayName
+
+            historyRepository.saveConversation(
+                title = title,
+                situation = currentSituation,
+                conversationText = conversationText,
+                generationLanguage = genLang,
+                interfaceLanguage = intLang
+            )
+        }
     }
 }

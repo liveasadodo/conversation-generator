@@ -27,4 +27,17 @@
     <string name="example_1">Ordering at a restaurant</string>
     <string name="example_2">Asking for directions</string>
     <string name="example_3">Checking in at a hotel</string>
+
+    <!-- History -->
+    <string name="title_history">Conversation History</string>
+    <string name="button_history">History</string>
+    <string name="button_filter_favorites">Favorites Only</string>
+    <string name="button_show_all">Show All</string>
+    <string name="message_no_conversations">No conversations yet</string>
+    <string name="message_no_favorites">No favorite conversations</string>
+    <string name="message_deleted">Conversation deleted</string>
+    <string name="button_delete">Delete</string>
+    <string name="dialog_delete_title">Delete Conversation</string>
+    <string name="dialog_delete_message">Are you sure you want to delete this conversation?</string>
+    <string name="button_cancel">Cancel</string>
 </resources>

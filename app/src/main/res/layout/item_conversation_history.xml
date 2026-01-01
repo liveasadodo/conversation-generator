@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header with title and favorite button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/titleText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
+                android:ellipsize="end"
+                android:maxLines="1"
+                tools:text="At a Restaurant" />
+
+            <ImageButton
+                android:id="@+id/favoriteButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/star_big_off"
+                android:contentDescription="@string/button_filter_favorites" />
+
+            <ImageButton
+                android:id="@+id/deleteButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_delete"
+                android:contentDescription="@string/button_delete" />
+        </LinearLayout>
+
+        <!-- Situation -->
+        <TextView
+            android:id="@+id/situationText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:ellipsize="end"
+            android:maxLines="2"
+            tools:text="Ordering food at a restaurant" />
+
+        <!-- Languages and timestamp -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/languageInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="English → 日本語" />
+
+            <TextView
+                android:id="@+id/timestampText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="2 hours ago" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

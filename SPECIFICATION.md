@@ -299,11 +299,19 @@ data class UsageMetadata(
 
 ### Future Enhancements
 
-#### Phase 3
-- Conversation history storage (local database)
-- Favorite conversations feature
-- Multiple difficulty levels UI
-- Conversation length options UI
+#### Phase 3 (Completed)
+- **Conversation history storage** (local database using Room)
+  - Store last 30 generated conversations
+  - Automatically delete oldest entries when limit exceeded
+  - Display history in reverse chronological order (newest first)
+- **Favorite conversations feature**
+  - Mark/unmark conversations as favorites
+  - Favorites are preserved even when history limit is exceeded
+  - Filter to show only favorites
+- **History UI**
+  - View saved conversations
+  - Delete individual conversations
+  - Search/filter functionality
 
 #### Phase 4
 - Audio playback of conversations (TTS)
