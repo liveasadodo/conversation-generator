@@ -81,3 +81,7 @@ lint-baseline.xml
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# IDE and Editor Settings
+.vscode/
+.claude/
