@@ -61,14 +61,20 @@ object PromptTemplates {
 
                     Format (IMPORTANT - Follow this exact format):
                     **Title**
+                    [TITLE_TRANSLATION]: [${interfaceLanguage!!.displayName} translation of title]
 
                     Speaker A: [original $languageName sentence]
-                    [TRANSLATION]: [${interfaceLanguage!!.displayName} translation]
-
-                    Speaker B: [original $languageName sentence]
+                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker A"]
                     [TRANSLATION]: [${interfaceLanguage.displayName} translation]
 
-                    CRITICAL: Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation.
+                    Speaker B: [original $languageName sentence]
+                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker B"]
+                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
+
+                    CRITICAL:
+                    1. The title must be followed immediately by a line starting with "[TITLE_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
+                    2. Each speaker's name must be followed immediately by a line starting with "[SPEAKER_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
+                    3. Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
                 """.trimIndent()
             }
             includeTranslation -> {
@@ -86,14 +92,20 @@ object PromptTemplates {
 
                     Format (IMPORTANT - Follow this exact format):
                     **Title**
+                    [TITLE_TRANSLATION]: [${interfaceLanguage!!.displayName} translation of title]
 
                     Speaker A: [original $languageName sentence]
-                    [TRANSLATION]: [${interfaceLanguage!!.displayName} translation]
-
-                    Speaker B: [original $languageName sentence]
+                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker A"]
                     [TRANSLATION]: [${interfaceLanguage.displayName} translation]
 
-                    CRITICAL: Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation.
+                    Speaker B: [original $languageName sentence]
+                    [SPEAKER_TRANSLATION]: [${interfaceLanguage.displayName} translation of "Speaker B"]
+                    [TRANSLATION]: [${interfaceLanguage.displayName} translation]
+
+                    CRITICAL:
+                    1. The title must be followed immediately by a line starting with "[TITLE_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
+                    2. Each speaker's name must be followed immediately by a line starting with "[SPEAKER_TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
+                    3. Each speaker's line must be followed immediately by a line starting with "[TRANSLATION]:" containing the ${interfaceLanguage.displayName} translation
                 """.trimIndent()
             }
             hasKeySentence -> {

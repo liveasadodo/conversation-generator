@@ -388,9 +388,15 @@ class MainActivity : AppCompatActivity() {
         // Parse the conversation
         parsedConversation = ConversationParser.parse(conversation)
 
-        // Display title
-        binding.conversationTitle.text = parsedConversation?.title ?: ""
-        binding.conversationTitle.visibility = if (parsedConversation?.title?.isNotEmpty() == true) View.VISIBLE else View.GONE
+        // Display title with translation if available
+        val parsed = parsedConversation
+        val titleText = if (parsed?.titleTranslation != null) {
+            "${parsed.title}\n(${parsed.titleTranslation})"
+        } else {
+            parsed?.title ?: ""
+        }
+        binding.conversationTitle.text = titleText
+        binding.conversationTitle.visibility = if (parsed?.title?.isNotEmpty() == true) View.VISIBLE else View.GONE
 
         // Clear previous content
         binding.conversationContainer.removeAllViews()
@@ -406,7 +412,13 @@ class MainActivity : AppCompatActivity() {
             val singleText = lineView.findViewById<TextView>(R.id.singleText)
             val speakButton = lineView.findViewById<android.widget.ImageButton>(R.id.speakButton)
 
-            speakerLabel.text = line.speaker
+            // Display speaker name with translation if available
+            val speakerText = if (line.speakerTranslation != null) {
+                "${line.speaker} (${line.speakerTranslation})"
+            } else {
+                line.speaker
+            }
+            speakerLabel.text = speakerText
 
             if (line.translationText != null) {
                 // Show two-column layout
