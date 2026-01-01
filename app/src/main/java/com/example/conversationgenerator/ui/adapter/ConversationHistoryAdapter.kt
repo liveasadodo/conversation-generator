@@ -66,12 +66,7 @@ class ConversationHistoryAdapter(
 
             // Show formality
             val formality = Formality.fromName(conversation.formality)
-            val currentLanguage = if (Locale.getDefault().language == "ja") {
-                com.example.conversationgenerator.data.model.Language.JAPANESE
-            } else {
-                com.example.conversationgenerator.data.model.Language.ENGLISH
-            }
-            formalityText.text = formality.getDisplayName(currentLanguage)
+            formalityText.text = itemView.context.getString(formality.stringResId)
 
             // Show conversation length
             conversationLengthText.text = itemView.context.getString(

@@ -278,12 +278,11 @@ class MainActivity : AppCompatActivity() {
         // Setup Formality Spinner
         val formalities = Formality.getAllFormalities()
         val savedFormalityName = languagePrefs.getString(KEY_FORMALITY, Formality.CASUAL.name)
-        val currentInterfaceLanguage = viewModel.interfaceLanguage.value ?: Language.JAPANESE
 
         val formalityAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
-            formalities.map { it.getDisplayName(currentInterfaceLanguage) }
+            formalities.map { getString(it.stringResId) }
         )
         formalityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.formalitySpinner.adapter = formalityAdapter

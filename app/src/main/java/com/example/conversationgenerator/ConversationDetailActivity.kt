@@ -64,12 +64,7 @@ class ConversationDetailActivity : AppCompatActivity() {
 
                 // Display formality
                 val formality = Formality.fromName(conversation.formality)
-                val currentLanguage = if (resources.configuration.locales[0].language == "ja") {
-                    Language.JAPANESE
-                } else {
-                    Language.ENGLISH
-                }
-                binding.formalityLabel.text = formality.getDisplayName(currentLanguage)
+                binding.formalityLabel.text = getString(formality.stringResId)
 
                 // Display conversation length
                 binding.conversationLengthLabel.text = getString(

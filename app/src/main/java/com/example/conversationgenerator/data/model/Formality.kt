@@ -1,23 +1,15 @@
 package com.example.conversationgenerator.data.model
 
+import com.example.conversationgenerator.R
+
 /**
  * Formality levels for conversation generation
  */
-enum class Formality(val displayNameEn: String, val displayNameJa: String) {
-    FORMAL("Formal", "フォーマル"),
-    BUSINESS_CASUAL("Business Casual", "ビジネスカジュアル"),
-    CASUAL("Casual", "カジュアル"),
-    BROKEN("Broken/Intimate", "ブロークン");
-
-    /**
-     * Get display name based on interface language
-     */
-    fun getDisplayName(language: Language): String {
-        return when (language) {
-            Language.JAPANESE -> displayNameJa
-            else -> displayNameEn
-        }
-    }
+enum class Formality(val stringResId: Int) {
+    FORMAL(R.string.formality_formal),
+    BUSINESS_CASUAL(R.string.formality_business_casual),
+    CASUAL(R.string.formality_casual),
+    BROKEN(R.string.formality_broken);
 
     companion object {
         /**
