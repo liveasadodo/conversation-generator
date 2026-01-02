@@ -8,19 +8,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.liveasadodo.conversationgenerator.data.database.ConversationDatabase
 import com.liveasadodo.conversationgenerator.data.model.Formality
 import com.liveasadodo.conversationgenerator.data.model.Language
-import com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository
 import com.liveasadodo.conversationgenerator.databinding.ActivityConversationDetailBinding
+import com.liveasadodo.conversationgenerator.ui.base.BaseActivity
 import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailViewModel
 import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailViewModelFactory
 import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailState
-import com.liveasadodo.conversationgenerator.util.ConversationParser
 
-class ConversationDetailActivity : AppCompatActivity() {
+class ConversationDetailActivity : BaseActivity() {
 
     private lateinit var binding: ActivityConversationDetailBinding
     private lateinit var viewModel: ConversationDetailViewModel
@@ -32,10 +29,8 @@ class ConversationDetailActivity : AppCompatActivity() {
         binding = ActivityConversationDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize repository and ViewModel
-        val database = ConversationDatabase.getDatabase(this)
-        val repository = ConversationHistoryRepository(database.conversationDao())
-        val factory = ConversationDetailViewModelFactory(repository)
+        // Initialize ViewModel
+        val factory = ConversationDetailViewModelFactory(historyRepository)
         viewModel = ViewModelProvider(this, factory)[ConversationDetailViewModel::class.java]
 
         // Initialize TTS Controller

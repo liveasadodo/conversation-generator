@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -12,10 +11,8 @@ import android.widget.ArrayAdapter
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import java.util.Locale
 import kotlinx.coroutines.launch
 import com.liveasadodo.conversationgenerator.data.api.RetrofitClient
 import com.liveasadodo.conversationgenerator.data.model.ApiResult
@@ -24,17 +21,16 @@ import com.liveasadodo.conversationgenerator.data.model.Language
 import com.liveasadodo.conversationgenerator.data.repository.ConversationRepository
 import com.liveasadodo.conversationgenerator.databinding.ActivityMainBinding
 import com.liveasadodo.conversationgenerator.ui.adapter.LanguageSpinnerAdapter
+import com.liveasadodo.conversationgenerator.ui.base.BaseActivity
 import com.liveasadodo.conversationgenerator.ui.viewmodel.MainViewModel
 import com.liveasadodo.conversationgenerator.ui.viewmodel.MainViewModelFactory
 import com.liveasadodo.conversationgenerator.util.ConversationParser
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
-    private lateinit var historyRepository: com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository
-    private lateinit var preferencesRepository: com.liveasadodo.conversationgenerator.data.repository.PreferencesRepository
     private lateinit var ttsController: com.liveasadodo.conversationgenerator.util.TTSController
     private var generatedConversation: String = ""
     private var parsedConversation: com.liveasadodo.conversationgenerator.util.ParsedConversation? = null
@@ -42,17 +38,9 @@ class MainActivity : AppCompatActivity() {
     private var currentKeySentence: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply saved interface language
-        applySavedLocale()
-
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Initialize repositories
-        val database = com.liveasadodo.conversationgenerator.data.database.ConversationDatabase.getDatabase(this)
-        historyRepository = com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository(database.conversationDao())
-        preferencesRepository = com.liveasadodo.conversationgenerator.data.repository.PreferencesRepository(this)
 
         // Initialize TTS Controller
         ttsController = com.liveasadodo.conversationgenerator.util.TTSController(this)
@@ -66,30 +54,6 @@ class MainActivity : AppCompatActivity() {
             setupUI()
             observeViewModel()
         }
-    }
-
-    private fun applySavedLocale() {
-        // Initialize preferences repository early for locale application
-        val tempPrefsRepository = com.liveasadodo.conversationgenerator.data.repository.PreferencesRepository(this)
-        val savedInterfaceLanguageCode = tempPrefsRepository.getInterfaceLanguageCode()
-        val locale = Locale(savedInterfaceLanguageCode)
-        Locale.setDefault(locale)
-
-        val config = Configuration(resources.configuration)
-        config.setLocale(locale)
-        createConfigurationContext(config)
-    }
-
-    private fun changeLocale(language: Language) {
-        val locale = Locale(language.code)
-        Locale.setDefault(locale)
-
-        val config = Configuration(resources.configuration)
-        config.setLocale(locale)
-        createConfigurationContext(config)
-
-        // Recreate activity to apply new locale
-        recreate()
     }
 
     private fun getApiKey(): String? {
@@ -252,7 +216,7 @@ class MainActivity : AppCompatActivity() {
                     // Save preference
                     preferencesRepository.saveInterfaceLanguage(selectedLanguage)
                     // Change locale
-                    changeLocale(selectedLanguage)
+                    changeLocale(selectedLanguage.code)
                 } else {
                     viewModel.setInterfaceLanguage(selectedLanguage)
                 }

@@ -4,19 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.liveasadodo.conversationgenerator.data.database.ConversationDatabase
 import com.liveasadodo.conversationgenerator.data.database.ConversationEntity
-import com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository
 import com.liveasadodo.conversationgenerator.databinding.ActivityHistoryBinding
 import com.liveasadodo.conversationgenerator.ui.adapter.ConversationHistoryAdapter
+import com.liveasadodo.conversationgenerator.ui.base.BaseActivity
 import com.liveasadodo.conversationgenerator.ui.viewmodel.HistoryViewModel
 import com.liveasadodo.conversationgenerator.ui.viewmodel.HistoryViewModelFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class HistoryActivity : AppCompatActivity() {
+class HistoryActivity : BaseActivity() {
 
     private lateinit var binding: ActivityHistoryBinding
     private lateinit var viewModel: HistoryViewModel
@@ -28,9 +26,7 @@ class HistoryActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Initialize ViewModel
-        val database = ConversationDatabase.getDatabase(this)
-        val repository = ConversationHistoryRepository(database.conversationDao())
-        val factory = HistoryViewModelFactory(repository)
+        val factory = HistoryViewModelFactory(historyRepository)
         viewModel = ViewModelProvider(this, factory)[HistoryViewModel::class.java]
 
         setupRecyclerView()
