@@ -20,18 +20,17 @@ import kotlinx.coroutines.launch
 class ConversationDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConversationDetailBinding
-    private lateinit var ttsManager: com.liveasadodo.conversationgenerator.util.TTSManager
+    private lateinit var ttsController: com.liveasadodo.conversationgenerator.util.TTSController
     private var parsedConversation: com.liveasadodo.conversationgenerator.util.ParsedConversation? = null
     private var generationLanguage: Language = Language.ENGLISH
-    private var currentPlayingButton: android.widget.ImageButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityConversationDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize TTS
-        ttsManager = com.liveasadodo.conversationgenerator.util.TTSManager(this)
+        // Initialize TTS Controller
+        ttsController = com.liveasadodo.conversationgenerator.util.TTSController(this)
 
         val conversationId = intent.getLongExtra("CONVERSATION_ID", -1)
         if (conversationId == -1L) {
@@ -185,94 +184,26 @@ class ConversationDetailActivity : AppCompatActivity() {
     }
 
     private fun handleSpeakButtonClick(button: android.widget.ImageButton, text: String, speaker: String) {
-        // Stop play all if active
-        if (ttsManager.isPlayingAll()) {
-            ttsManager.stopPlayAll()
-            binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
-        }
-
-        if (ttsManager.isSpeaking() && currentPlayingButton == button) {
-            // Stop if already playing this line
-            ttsManager.stop()
-            button.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
-            currentPlayingButton = null
-        } else {
-            // Stop any currently playing
-            if (currentPlayingButton != null) {
-                currentPlayingButton?.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
-            }
-
-            // Start playing new line with speaker-specific voice
-            val success = ttsManager.speak(text, generationLanguage, speaker)
-            if (success) {
-                button.setImageResource(android.R.drawable.ic_lock_silent_mode)
-                currentPlayingButton = button
-
-                // Reset button icon when speech finishes
-                button.postDelayed({
-                    if (currentPlayingButton == button && !ttsManager.isSpeaking()) {
-                        button.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
-                        currentPlayingButton = null
-                    }
-                }, 100)
-            } else {
-                Toast.makeText(
-                    this,
-                    getString(R.string.error_tts_language_not_available, generationLanguage.displayName),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
+        ttsController.handleSpeakButtonClick(
+            button = button,
+            text = text,
+            speaker = speaker,
+            language = generationLanguage,
+            playAllButton = binding.playAllButton
+        )
     }
 
     private fun handlePlayAllButtonClick() {
-        if (ttsManager.isPlayingAll()) {
-            // Stop play all
-            ttsManager.stopPlayAll()
-            binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
-        } else {
-            // Stop any individual line playback
-            if (currentPlayingButton != null) {
-                currentPlayingButton?.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
-                currentPlayingButton = null
-                ttsManager.stop()
-            }
-
-            // Get all texts and speakers from parsed conversation
-            val texts = parsedConversation?.lines?.map { it.originalText } ?: emptyList()
-            val speakers = parsedConversation?.lines?.map { it.speaker } ?: emptyList()
-
-            if (texts.isEmpty()) {
-                Toast.makeText(this, R.string.error_no_conversation, Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            // Start play all with speaker-specific voices
-            val success = ttsManager.playAll(
-                texts = texts,
-                language = generationLanguage,
-                speakers = speakers,
-                onComplete = {
-                    runOnUiThread {
-                        binding.playAllButton.setImageResource(android.R.drawable.ic_media_play)
-                    }
-                }
-            )
-
-            if (success) {
-                binding.playAllButton.setImageResource(android.R.drawable.ic_media_pause)
-            } else {
-                Toast.makeText(
-                    this,
-                    getString(R.string.error_tts_language_not_available, generationLanguage.displayName),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
+        ttsController.handlePlayAllButtonClick(
+            playAllButton = binding.playAllButton,
+            parsedConversation = parsedConversation,
+            language = generationLanguage,
+            onComplete = { }
+        )
     }
 
     override fun onDestroy() {
-        ttsManager.shutdown()
+        ttsController.shutdown()
         super.onDestroy()
     }
 }
