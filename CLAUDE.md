@@ -17,76 +17,60 @@ User Request → Review/Update SPECIFICATION.md → Implement Code → Test
 - Pass as query parameter: `?key=YOUR_API_KEY`
 
 ### Gemini API Configuration
-- Endpoint: `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`
 - Model: `gemini-2.5-flash` (production)
-- Request/response format: See SPECIFICATION.md
-- All API responses must be in JSON format
+- All API responses MUST be in JSON format
 - Use ConversationParser utility for parsing responses
-- Response structure: title, titleTranslation, lines array with speaker data
+- See SPECIFICATION.md for endpoint details and response structure
 
 ### Error Handling
 - Use sealed class `ApiResult<T>` pattern (Success, Error, NetworkError, Loading)
 - Implement retry logic with exponential backoff (max 3 attempts)
 - Handle all HTTP error codes: 400, 401, 429, 500
-- User-friendly error messages (no technical details)
-- Retry delays: 2s, 4s, 8s (exponential backoff)
+- User-friendly error messages (NEVER expose technical details or sensitive info)
+- Use RetryUtil for consistent retry behavior
 
 ### Rate Limiting
-- Free tier: 15 RPM, 1M TPM, 1,500 RPD
-- Implement 4-second minimum interval between requests
-- Use RateLimiter utility to enforce rate limits
+- ALWAYS enforce 4-second minimum interval between API requests
+- Use RateLimiter utility to prevent rate limit violations
 
 ## Code Patterns
 
 ### Architecture
-- MVVM pattern: Activity → ViewModel → Repository → ApiService
-- Coroutines with proper dispatchers (IO for network, Main for UI)
-- LiveData for state management
+- MUST follow MVVM pattern: Activity → ViewModel → Repository → ApiService
+- Use Coroutines with proper dispatchers (IO for network, Main for UI)
+- Use LiveData for state management
+- See SPECIFICATION.md for component details
 
 ### Data Models
-- Language enum: displayName, code, flag (emoji)
-- Formality enum: uses stringResId for localization (not hardcoded display names)
-- ConversationEntity: Room database entity with all conversation metadata
+- NEVER hardcode display names in enums - use string resources for localization
+- Use proper Room annotations for database entities
+- See SPECIFICATION.md for data model definitions
 
 ### Input Validation
-- Max lengths: Situation (500 chars), Key Sentence (200 chars)
-- Validate before API calls
-- Trim and sanitize user input
-- Use InputValidator utility
+- ALWAYS validate user input before API calls
+- Enforce max lengths: Situation (500 chars), Key Sentence (200 chars)
+- Trim and sanitize all user input
+- Use InputValidator utility for consistency
 
 ### Text-to-Speech
-- Use TTSManager singleton for TTS operations
-- Speaker-specific voice profiles (pitch: 0.7-1.3, speechRate: 0.85-1.15)
-- Play all feature with sequential playback
-- Automatic speaker voice differentiation
-- Supports all 8 generation languages
+- Use TTSManager singleton for all TTS operations
+- NEVER create multiple TTS instances
+- Always provide speaker information for voice differentiation
+- Handle TTS initialization failures gracefully
 
-### Utility Classes
-- TTSManager: Text-to-speech with speaker voice profiles
-- RateLimiter: API request throttling
-- RetryUtil: Exponential backoff retry logic
-- ConversationParser: JSON response parsing
-- PromptTemplates: API prompt generation
-- InputValidator: User input validation
-- ModelConfig: API configuration constants
+### Utility Usage
+- Use existing utility classes instead of reimplementing logic
+- See SPECIFICATION.md for utility class details
 
 ### Security Checklist
-- [ ] No hardcoded API keys
-- [ ] HTTPS enforced
-- [ ] Input validation implemented
-- [ ] Error messages don't expose sensitive info
-- [ ] ProGuard for release builds (currently disabled - minifyEnabled false)
+Before submitting code, verify:
+- [ ] No hardcoded API keys or sensitive data
+- [ ] HTTPS enforced for all network calls
+- [ ] Input validation implemented for all user inputs
+- [ ] Error messages don't expose technical details or sensitive info
+- [ ] No sensitive data logged in production builds
 
-## Build Configuration
-- Min SDK: API 24 (Android 7.0)
-- Target SDK: API 34 (Android 14)
-- JDK: 17
-- Gradle: 8.7+
-- AGP: 8.7.3
-- Room Database: 2.6.1
-- Retrofit: 2.9.0
-- Kotlin Coroutines: 1.7.3
-
-## References
-- [Google AI Studio](https://aistudio.google.com/)
-- [Gemini API Documentation](https://ai.google.dev/docs)
+### Code Quality
+- Follow Kotlin coding conventions
+- Prefer immutability (val over var)
+- Keep functions focused and concise
