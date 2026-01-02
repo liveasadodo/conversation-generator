@@ -64,4 +64,15 @@
 
     <!-- Display Labels -->
     <string name="label_key_sentence_display">Key: %1$s</string>
+
+    <!-- Settings -->
+    <string name="title_settings">Settings</string>
+    <string name="menu_settings">Settings</string>
+    <string name="label_api_key">API Key</string>
+    <string name="hint_api_key">Enter your Gemini API key</string>
+    <string name="button_save">Save</string>
+    <string name="label_app_version">App Version</string>
+    <string name="message_api_key_saved">API key saved</string>
+    <string name="error_empty_api_key">API key cannot be empty</string>
+    <string name="content_description_toggle_password">Toggle password visibility</string>
 </resources>

@@ -81,6 +81,16 @@ data class VoiceProfile(val pitch: Float, val speechRate: Float)
 - Copy to clipboard
 - Share via Android share menu
 
+### 10. Settings Screen
+- **Access**: Settings button (gear icon) in main screen toolbar
+- **Features**:
+  - **API Key Management**: View and edit Gemini API key
+    - Secure input field (password type with show/hide toggle)
+    - Save button to update API key in SharedPreferences
+    - Input validation for non-empty key
+  - **App Information**: Display app build version (read-only)
+- **Navigation**: Dedicated SettingsActivity accessible from MainActivity
+
 ## Technical Specifications
 
 ### API Integration
@@ -159,6 +169,7 @@ Activity → ViewModel → Repository → ApiService → Gemini API
 - MainActivity: Main UI
 - ConversationDetailActivity: View saved conversations
 - HistoryActivity: Conversation history list
+- SettingsActivity: Settings screen (API key management, app info)
 - MainViewModel: Business logic
 - ConversationRepository: API operations
 - ConversationHistoryRepository: Database operations

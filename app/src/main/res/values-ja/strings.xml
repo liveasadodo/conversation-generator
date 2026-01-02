@@ -64,4 +64,15 @@
 
     <!-- Display Labels -->
     <string name="label_key_sentence_display">キー: %1$s</string>
+
+    <!-- Settings -->
+    <string name="title_settings">設定</string>
+    <string name="menu_settings">設定</string>
+    <string name="label_api_key">APIキー</string>
+    <string name="hint_api_key">Gemini APIキーを入力してください</string>
+    <string name="button_save">保存</string>
+    <string name="label_app_version">アプリバージョン</string>
+    <string name="message_api_key_saved">APIキーを保存しました</string>
+    <string name="error_empty_api_key">APIキーを入力してください</string>
+    <string name="content_description_toggle_password">パスワード表示の切り替え</string>
 </resources>
