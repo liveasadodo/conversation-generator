@@ -115,7 +115,6 @@ Additional constraint: Must naturally include the key sentence: {keySentence}
 **With Translation:**
 ```
 Additional instruction: Provide {interfaceLanguage} translations in the JSON fields
-Max tokens increased to 2048
 ```
 
 **With Formality:**
@@ -131,7 +130,7 @@ Additional instruction based on formality level:
 ```json
 {
   "temperature": 0.7,
-  "maxOutputTokens": 1024, // 2048 with translation
+  "maxOutputTokens": 1024,
   "topP": 0.95,
   "topK": 40
 }
@@ -156,31 +155,41 @@ Activity → ViewModel → Repository → ApiService → Gemini API
 - GeminiApiService: Retrofit interface
 - TTSManager: Text-to-speech management
 
+**Utility Components:**
+- TTSManager: Text-to-speech with speaker voice profiles
+- RateLimiter: API request throttling (4-second minimum interval)
+- RetryUtil: Exponential backoff retry logic (max 3 attempts, 2s/4s/8s delays)
+- ConversationParser: JSON response parsing
+- PromptTemplates: API prompt generation
+- InputValidator: User input validation
+- ModelConfig: API configuration constants (temperature, tokens, top-p, top-k)
+
 ### Data Models
 
 **Language Enum:**
 ```kotlin
-enum class Language(val displayName: String, val code: String) {
-    ENGLISH("English", "en"),
-    JAPANESE("日本語", "ja"),
-    SPANISH("Español", "es"),
-    FRENCH("Français", "fr"),
-    GERMAN("Deutsch", "de"),
-    CHINESE("中文", "zh"),
-    KOREAN("한국語", "ko"),
-    HINDI("हिन्दी", "hi")
+enum class Language(val displayName: String, val code: String, val flag: String) {
+    ENGLISH("English", "en", "🇺🇸"),
+    JAPANESE("日本語", "ja", "🇯🇵"),
+    SPANISH("Español", "es", "🇪🇸"),
+    FRENCH("Français", "fr", "🇫🇷"),
+    GERMAN("Deutsch", "de", "🇩🇪"),
+    CHINESE("中文", "zh", "🇨🇳"),
+    KOREAN("한국어", "ko", "🇰🇷"),
+    HINDI("हिन्दी", "hi", "🇮🇳")
 }
 ```
 
 **Formality Enum:**
 ```kotlin
-enum class Formality(val displayNameEn: String, val displayNameJa: String) {
-    FORMAL("Formal", "フォーマル"),
-    BUSINESS_CASUAL("Business Casual", "ビジネスカジュアル"),
-    CASUAL("Casual", "カジュアル"),
-    BROKEN("Broken/Intimate", "ブロークン")
+enum class Formality(val stringResId: Int) {
+    FORMAL(R.string.formality_formal),
+    BUSINESS_CASUAL(R.string.formality_business_casual),
+    CASUAL(R.string.formality_casual),
+    BROKEN(R.string.formality_broken)
 }
 ```
+Note: Formality uses string resource IDs for localization instead of hardcoded display names.
 
 **Database Entity:**
 ```kotlin
@@ -200,6 +209,15 @@ data class ConversationEntity(
     val isFavorite: Boolean = false
 )
 ```
+
+### Database
+
+**Room Database:**
+- Max conversations: 30
+- Auto-delete oldest (except favorites) when limit exceeded
+- ConversationDao provides CRUD operations
+- Supports filtering by favorites
+- Newest conversations first (ordered by timestamp DESC)
 
 ### Security
 
@@ -262,7 +280,10 @@ data class ConversationEntity(
 
 - Min SDK: API 24 (Android 7.0)
 - Target SDK: API 34 (Android 14)
-- ProGuard enabled for release builds
+- JDK: 17
+- Gradle: 8.7+
+- AGP: 8.7.3
+- ProGuard: Currently disabled (minifyEnabled false)
 
 ### Localization
 
@@ -273,8 +294,4 @@ data class ConversationEntity(
 ## Future Enhancements
 
 - Additional interface languages (Spanish, French, Chinese, Korean)
-- Dark mode support
-- Offline mode with cached conversations
-- User accounts and cloud sync
-- Export conversations to PDF
 - Conversation difficulty levels (beginner, intermediate, advanced)
