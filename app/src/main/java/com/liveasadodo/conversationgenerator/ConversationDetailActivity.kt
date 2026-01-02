@@ -5,29 +5,38 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import com.liveasadodo.conversationgenerator.data.database.ConversationDatabase
 import com.liveasadodo.conversationgenerator.data.model.Formality
 import com.liveasadodo.conversationgenerator.data.model.Language
 import com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository
 import com.liveasadodo.conversationgenerator.databinding.ActivityConversationDetailBinding
+import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailViewModel
+import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailViewModelFactory
+import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailState
 import com.liveasadodo.conversationgenerator.util.ConversationParser
-import kotlinx.coroutines.launch
 
 class ConversationDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConversationDetailBinding
+    private lateinit var viewModel: ConversationDetailViewModel
     private lateinit var ttsController: com.liveasadodo.conversationgenerator.util.TTSController
-    private var parsedConversation: com.liveasadodo.conversationgenerator.util.ParsedConversation? = null
     private var generationLanguage: Language = Language.ENGLISH
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityConversationDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize repository and ViewModel
+        val database = ConversationDatabase.getDatabase(this)
+        val repository = ConversationHistoryRepository(database.conversationDao())
+        val factory = ConversationDetailViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[ConversationDetailViewModel::class.java]
 
         // Initialize TTS Controller
         ttsController = com.liveasadodo.conversationgenerator.util.TTSController(this)
@@ -38,57 +47,68 @@ class ConversationDetailActivity : AppCompatActivity() {
             return
         }
 
-        loadConversation(conversationId)
         setupListeners()
+        observeViewModel()
+        viewModel.loadConversation(conversationId)
     }
 
-    private fun loadConversation(conversationId: Long) {
-        lifecycleScope.launch {
-            val database = ConversationDatabase.getDatabase(this@ConversationDetailActivity)
-            val repository = ConversationHistoryRepository(database.conversationDao())
-
-            val conversation = repository.getConversationById(conversationId)
-            if (conversation != null) {
-                binding.titleTextView.text = conversation.title
-                // Get generation language from saved conversation
-                generationLanguage = Language.fromDisplayName(conversation.generationLanguage)
-
-                // Display key sentence if present
-                if (!conversation.keySentence.isNullOrBlank()) {
-                    binding.keySentenceLabel.visibility = android.view.View.VISIBLE
-                    binding.keySentenceLabel.text = getString(R.string.label_key_sentence_display, conversation.keySentence)
-                } else {
-                    binding.keySentenceLabel.visibility = android.view.View.GONE
+    private fun observeViewModel() {
+        viewModel.conversationState.observe(this) { state ->
+            when (state) {
+                is ConversationDetailState.Loading -> {
+                    // Could show loading indicator here if needed
                 }
+                is ConversationDetailState.Success -> {
+                    displayConversationDetails(state.conversation)
+                }
+                is ConversationDetailState.NotFound -> {
+                    Toast.makeText(this, "Conversation not found", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+                is ConversationDetailState.Error -> {
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
 
-                // Display formality
-                val formality = Formality.fromName(conversation.formality)
-                binding.formalityLabel.text = getString(formality.stringResId)
-
-                // Display conversation length
-                binding.conversationLengthLabel.text = getString(
-                    R.string.conversation_length_format,
-                    conversation.conversationLength
-                )
-
-                displayConversation(conversation.conversationText)
-            } else {
-                Toast.makeText(this@ConversationDetailActivity, "Conversation not found", Toast.LENGTH_SHORT).show()
-                finish()
+        viewModel.parsedConversation.observe(this) { parsed ->
+            parsed?.let {
+                displayParsedConversation(it)
             }
         }
     }
 
-    private fun displayConversation(conversationText: String) {
-        // Parse the conversation
-        parsedConversation = ConversationParser.parse(conversationText)
+    private fun displayConversationDetails(conversation: com.liveasadodo.conversationgenerator.data.database.ConversationEntity) {
+        binding.titleTextView.text = conversation.title
+        // Get generation language from saved conversation
+        generationLanguage = Language.fromDisplayName(conversation.generationLanguage)
 
+        // Display key sentence if present
+        if (!conversation.keySentence.isNullOrBlank()) {
+            binding.keySentenceLabel.visibility = View.VISIBLE
+            binding.keySentenceLabel.text = getString(R.string.label_key_sentence_display, conversation.keySentence)
+        } else {
+            binding.keySentenceLabel.visibility = View.GONE
+        }
+
+        // Display formality
+        val formality = Formality.fromName(conversation.formality)
+        binding.formalityLabel.text = getString(formality.stringResId)
+
+        // Display conversation length
+        binding.conversationLengthLabel.text = getString(
+            R.string.conversation_length_format,
+            conversation.conversationLength
+        )
+    }
+
+    private fun displayParsedConversation(parsed: com.liveasadodo.conversationgenerator.util.ParsedConversation) {
         // Display title with translation if available
-        val parsed = parsedConversation
-        val titleText = if (parsed?.titleTranslation != null) {
+        val titleText = if (parsed.titleTranslation != null) {
             "${parsed.title}\n(${parsed.titleTranslation})"
         } else {
-            parsed?.title ?: ""
+            parsed.title
         }
         binding.conversationTitle.text = titleText
 
@@ -96,7 +116,7 @@ class ConversationDetailActivity : AppCompatActivity() {
         binding.conversationContainer.removeAllViews()
 
         // Add conversation lines
-        parsedConversation?.lines?.forEach { line ->
+        parsed.lines.forEach { line ->
             val lineView = layoutInflater.inflate(R.layout.item_conversation_line, binding.conversationContainer, false)
 
             val speakerLabel = lineView.findViewById<TextView>(R.id.speakerLabel)
@@ -156,12 +176,7 @@ class ConversationDetailActivity : AppCompatActivity() {
 
     private fun copyToClipboard() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-        val textToCopy = if (parsedConversation != null) {
-            ConversationParser.formatForCopy(parsedConversation!!)
-        } else {
-            ""
-        }
+        val textToCopy = viewModel.getFormattedText()
 
         val clip = ClipData.newPlainText("Conversation", textToCopy)
         clipboard.setPrimaryClip(clip)
@@ -169,16 +184,13 @@ class ConversationDetailActivity : AppCompatActivity() {
     }
 
     private fun shareConversation() {
-        val textToShare = if (parsedConversation != null) {
-            ConversationParser.formatForCopy(parsedConversation!!)
-        } else {
-            ""
-        }
+        val textToShare = viewModel.getFormattedText()
+        val title = viewModel.parsedConversation.value?.title ?: "Conversation"
 
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, textToShare)
-            putExtra(Intent.EXTRA_SUBJECT, parsedConversation?.title ?: "Conversation")
+            putExtra(Intent.EXTRA_SUBJECT, title)
         }
         startActivity(Intent.createChooser(intent, getString(R.string.button_share)))
     }
@@ -196,7 +208,7 @@ class ConversationDetailActivity : AppCompatActivity() {
     private fun handlePlayAllButtonClick() {
         ttsController.handlePlayAllButtonClick(
             playAllButton = binding.playAllButton,
-            parsedConversation = parsedConversation,
+            parsedConversation = viewModel.parsedConversation.value,
             language = generationLanguage,
             onComplete = { }
         )
