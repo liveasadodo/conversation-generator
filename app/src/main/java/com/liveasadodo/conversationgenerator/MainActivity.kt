@@ -34,22 +34,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
     private lateinit var historyRepository: com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository
+    private lateinit var preferencesRepository: com.liveasadodo.conversationgenerator.data.repository.PreferencesRepository
     private lateinit var ttsController: com.liveasadodo.conversationgenerator.util.TTSController
     private var generatedConversation: String = ""
     private var parsedConversation: com.liveasadodo.conversationgenerator.util.ParsedConversation? = null
     private var currentSituation: String = ""
     private var currentKeySentence: String? = null
-
-    companion object {
-        private const val PREFS_NAME = "api_keys"
-        private const val KEY_GEMINI_API_KEY = "gemini_api_key"
-        private const val PREFS_LANGUAGE = "language_prefs"
-        private const val KEY_GENERATION_LANGUAGE = "generation_language"
-        private const val KEY_INTERFACE_LANGUAGE = "interface_language"
-        private const val KEY_FORMALITY = "formality"
-        private const val KEY_CONVERSATION_LENGTH = "conversation_length"
-        private const val DEFAULT_CONVERSATION_LENGTH = 3
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Apply saved interface language
@@ -59,9 +49,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize history repository
+        // Initialize repositories
         val database = com.liveasadodo.conversationgenerator.data.database.ConversationDatabase.getDatabase(this)
         historyRepository = com.liveasadodo.conversationgenerator.data.repository.ConversationHistoryRepository(database.conversationDao())
+        preferencesRepository = com.liveasadodo.conversationgenerator.data.repository.PreferencesRepository(this)
 
         // Initialize TTS Controller
         ttsController = com.liveasadodo.conversationgenerator.util.TTSController(this)
@@ -78,9 +69,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun applySavedLocale() {
-        val languagePrefs = getSharedPreferences(PREFS_LANGUAGE, Context.MODE_PRIVATE)
-        val savedInterfaceLanguageCode = languagePrefs.getString(KEY_INTERFACE_LANGUAGE, Language.JAPANESE.code)
-        val locale = Locale(savedInterfaceLanguageCode ?: Language.JAPANESE.code)
+        // Initialize preferences repository early for locale application
+        val tempPrefsRepository = com.liveasadodo.conversationgenerator.data.repository.PreferencesRepository(this)
+        val savedInterfaceLanguageCode = tempPrefsRepository.getInterfaceLanguageCode()
+        val locale = Locale(savedInterfaceLanguageCode)
         Locale.setDefault(locale)
 
         val config = Configuration(resources.configuration)
@@ -101,15 +93,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getApiKey(): String? {
-        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return sharedPreferences.getString(KEY_GEMINI_API_KEY, null)
+        return preferencesRepository.getApiKey()
     }
 
     private fun saveApiKey(apiKey: String) {
-        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit()
-            .putString(KEY_GEMINI_API_KEY, apiKey)
-            .apply()
+        preferencesRepository.saveApiKey(apiKey)
     }
 
     private fun showApiKeyDialog() {
@@ -221,9 +209,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupLanguageSpinners() {
         // Load saved language preferences
-        val languagePrefs = getSharedPreferences(PREFS_LANGUAGE, Context.MODE_PRIVATE)
-        val savedGenerationLanguageCode = languagePrefs.getString(KEY_GENERATION_LANGUAGE, Language.ENGLISH.code)
-        val savedInterfaceLanguageCode = languagePrefs.getString(KEY_INTERFACE_LANGUAGE, Language.JAPANESE.code)
+        val savedGenerationLanguage = preferencesRepository.getGenerationLanguage()
+        val savedInterfaceLanguage = preferencesRepository.getInterfaceLanguage()
 
         // Setup Generation Language Spinner
         val generationLanguages = Language.getGenerationLanguages()
@@ -231,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         binding.generationLanguageSpinner.adapter = generationAdapter
 
         // Set saved language or default to English
-        val savedGenerationIndex = generationLanguages.indexOfFirst { it.code == savedGenerationLanguageCode }
+        val savedGenerationIndex = generationLanguages.indexOfFirst { it.code == savedGenerationLanguage.code }
         binding.generationLanguageSpinner.setSelection(if (savedGenerationIndex >= 0) savedGenerationIndex else 0)
 
         binding.generationLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -239,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                 val selectedLanguage = generationLanguages[position]
                 viewModel.setGenerationLanguage(selectedLanguage)
                 // Save preference
-                languagePrefs.edit().putString(KEY_GENERATION_LANGUAGE, selectedLanguage.code).apply()
+                preferencesRepository.saveGenerationLanguage(selectedLanguage)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -251,19 +238,19 @@ class MainActivity : AppCompatActivity() {
         binding.interfaceLanguageSpinner.adapter = interfaceAdapter
 
         // Set saved language or default to Japanese
-        val savedInterfaceIndex = interfaceLanguages.indexOfFirst { it.code == savedInterfaceLanguageCode }
+        val savedInterfaceIndex = interfaceLanguages.indexOfFirst { it.code == savedInterfaceLanguage.code }
         binding.interfaceLanguageSpinner.setSelection(if (savedInterfaceIndex >= 0) savedInterfaceIndex else 1)
 
         binding.interfaceLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedLanguage = interfaceLanguages[position]
-                val currentLanguageCode = languagePrefs.getString(KEY_INTERFACE_LANGUAGE, Language.JAPANESE.code)
+                val currentLanguageCode = preferencesRepository.getInterfaceLanguageCode()
 
                 // Only change locale if it's different from current
                 if (selectedLanguage.code != currentLanguageCode) {
                     viewModel.setInterfaceLanguage(selectedLanguage)
                     // Save preference
-                    languagePrefs.edit().putString(KEY_INTERFACE_LANGUAGE, selectedLanguage.code).apply()
+                    preferencesRepository.saveInterfaceLanguage(selectedLanguage)
                     // Change locale
                     changeLocale(selectedLanguage)
                 } else {
@@ -276,7 +263,7 @@ class MainActivity : AppCompatActivity() {
 
         // Setup Formality Spinner
         val formalities = Formality.getAllFormalities()
-        val savedFormalityName = languagePrefs.getString(KEY_FORMALITY, Formality.CASUAL.name)
+        val savedFormality = preferencesRepository.getFormality()
 
         val formalityAdapter = ArrayAdapter(
             this,
@@ -287,7 +274,7 @@ class MainActivity : AppCompatActivity() {
         binding.formalitySpinner.adapter = formalityAdapter
 
         // Set saved formality or default to Casual
-        val savedFormalityIndex = formalities.indexOfFirst { it.name == savedFormalityName }
+        val savedFormalityIndex = formalities.indexOfFirst { it.name == savedFormality.name }
         binding.formalitySpinner.setSelection(if (savedFormalityIndex >= 0) savedFormalityIndex else 2) // CASUAL is index 2
 
         binding.formalitySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -295,7 +282,7 @@ class MainActivity : AppCompatActivity() {
                 val selectedFormality = formalities[position]
                 viewModel.setFormality(selectedFormality)
                 // Save preference
-                languagePrefs.edit().putString(KEY_FORMALITY, selectedFormality.name).apply()
+                preferencesRepository.saveFormality(selectedFormality)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -303,8 +290,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupConversationLengthSeekBar() {
-        val languagePrefs = getSharedPreferences(PREFS_LANGUAGE, Context.MODE_PRIVATE)
-        val savedLength = languagePrefs.getInt(KEY_CONVERSATION_LENGTH, DEFAULT_CONVERSATION_LENGTH)
+        val savedLength = preferencesRepository.getConversationLength()
 
         // SeekBar range is 0-3, representing 2-5 turns
         binding.conversationLengthSeekBar.progress = savedLength - 2
@@ -323,7 +309,7 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 val length = (seekBar?.progress ?: 0) + 2
                 // Save preference
-                languagePrefs.edit().putInt(KEY_CONVERSATION_LENGTH, length).apply()
+                preferencesRepository.saveConversationLength(length)
             }
         })
     }
@@ -452,8 +438,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun resetApiKey() {
         // Clear existing API key
-        val sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        sharedPreferences.edit().remove(KEY_GEMINI_API_KEY).apply()
+        preferencesRepository.clearApiKey()
 
         // Show dialog to enter new API key
         showApiKeyDialog()
@@ -496,7 +481,7 @@ class MainActivity : AppCompatActivity() {
             val genLang = viewModel.generationLanguage.value?.displayName ?: "English"
             val intLang = viewModel.interfaceLanguage.value?.displayName
             val formalityName = viewModel.formality.value?.name ?: Formality.CASUAL.name
-            val conversationLength = viewModel.conversationLength.value ?: DEFAULT_CONVERSATION_LENGTH
+            val conversationLength = viewModel.conversationLength.value ?: preferencesRepository.getConversationLength()
 
             historyRepository.saveConversation(
                 title = title,
