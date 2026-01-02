@@ -330,57 +330,17 @@ class MainActivity : BaseActivity() {
         // Parse the conversation
         parsedConversation = ConversationParser.parse(conversation)
 
-        // Display title with translation if available
-        val parsed = parsedConversation
-        val titleText = if (parsed?.titleTranslation != null) {
-            "${parsed.title}\n(${parsed.titleTranslation})"
-        } else {
-            parsed?.title ?: ""
-        }
-        binding.conversationTitle.text = titleText
-        binding.conversationTitle.visibility = if (parsed?.title?.isNotEmpty() == true) View.VISIBLE else View.GONE
-
-        // Clear previous content
-        binding.conversationContainer.removeAllViews()
-
-        // Add conversation lines
-        parsedConversation?.lines?.forEach { line ->
-            val lineView = layoutInflater.inflate(R.layout.item_conversation_line, binding.conversationContainer, false)
-
-            val speakerLabel = lineView.findViewById<TextView>(R.id.speakerLabel)
-            val originalText = lineView.findViewById<TextView>(R.id.originalText)
-            val translationText = lineView.findViewById<TextView>(R.id.translationText)
-            val translationContainer = lineView.findViewById<View>(R.id.translationContainer)
-            val singleText = lineView.findViewById<TextView>(R.id.singleText)
-            val speakButton = lineView.findViewById<android.widget.ImageButton>(R.id.speakButton)
-
-            // Display speaker name with translation if available
-            val speakerText = if (line.speakerTranslation != null) {
-                "${line.speaker} (${line.speakerTranslation})"
-            } else {
-                line.speaker
-            }
-            speakerLabel.text = speakerText
-
-            if (line.translationText != null) {
-                // Show two-column layout
-                translationContainer.visibility = View.VISIBLE
-                singleText.visibility = View.GONE
-                originalText.text = line.originalText
-                translationText.text = line.translationText
-            } else {
-                // Show single column layout
-                translationContainer.visibility = View.GONE
-                singleText.visibility = View.VISIBLE
-                singleText.text = line.originalText
-            }
-
-            // Setup speaker button
-            speakButton.setOnClickListener {
-                handleSpeakButtonClick(speakButton, line.originalText, line.speaker)
-            }
-
-            binding.conversationContainer.addView(lineView)
+        // Display conversation using helper
+        parsedConversation?.let { parsed ->
+            com.liveasadodo.conversationgenerator.util.ConversationDisplayHelper.displayConversation(
+                context = this,
+                container = binding.conversationContainer,
+                titleTextView = binding.conversationTitle,
+                parsedConversation = parsed,
+                onSpeakButtonClick = { button, text, speaker ->
+                    handleSpeakButtonClick(button, text, speaker)
+                }
+            )
         }
     }
 

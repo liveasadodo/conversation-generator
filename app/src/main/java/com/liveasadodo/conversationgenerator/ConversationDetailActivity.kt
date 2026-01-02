@@ -99,56 +99,16 @@ class ConversationDetailActivity : BaseActivity() {
     }
 
     private fun displayParsedConversation(parsed: com.liveasadodo.conversationgenerator.util.ParsedConversation) {
-        // Display title with translation if available
-        val titleText = if (parsed.titleTranslation != null) {
-            "${parsed.title}\n(${parsed.titleTranslation})"
-        } else {
-            parsed.title
-        }
-        binding.conversationTitle.text = titleText
-
-        // Clear previous content
-        binding.conversationContainer.removeAllViews()
-
-        // Add conversation lines
-        parsed.lines.forEach { line ->
-            val lineView = layoutInflater.inflate(R.layout.item_conversation_line, binding.conversationContainer, false)
-
-            val speakerLabel = lineView.findViewById<TextView>(R.id.speakerLabel)
-            val originalText = lineView.findViewById<TextView>(R.id.originalText)
-            val translationText = lineView.findViewById<TextView>(R.id.translationText)
-            val translationContainer = lineView.findViewById<android.view.View>(R.id.translationContainer)
-            val singleText = lineView.findViewById<TextView>(R.id.singleText)
-            val speakButton = lineView.findViewById<android.widget.ImageButton>(R.id.speakButton)
-
-            // Display speaker name with translation if available
-            val speakerText = if (line.speakerTranslation != null) {
-                "${line.speaker} (${line.speakerTranslation})"
-            } else {
-                line.speaker
+        // Display conversation using helper
+        com.liveasadodo.conversationgenerator.util.ConversationDisplayHelper.displayConversation(
+            context = this,
+            container = binding.conversationContainer,
+            titleTextView = binding.conversationTitle,
+            parsedConversation = parsed,
+            onSpeakButtonClick = { button, text, speaker ->
+                handleSpeakButtonClick(button, text, speaker)
             }
-            speakerLabel.text = speakerText
-
-            if (line.translationText != null) {
-                // Show two-column layout
-                translationContainer.visibility = android.view.View.VISIBLE
-                singleText.visibility = android.view.View.GONE
-                originalText.text = line.originalText
-                translationText.text = line.translationText
-            } else {
-                // Show single column layout
-                translationContainer.visibility = android.view.View.GONE
-                singleText.visibility = android.view.View.VISIBLE
-                singleText.text = line.originalText
-            }
-
-            // Setup speaker button
-            speakButton.setOnClickListener {
-                handleSpeakButtonClick(speakButton, line.originalText, line.speaker)
-            }
-
-            binding.conversationContainer.addView(lineView)
-        }
+        )
     }
 
     private fun setupListeners() {
