@@ -5,6 +5,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -42,6 +44,9 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Setup Toolbar
+        setSupportActionBar(binding.toolbar)
 
         // Initialize TTS Controller
         ttsController = com.liveasadodo.conversationgenerator.util.TTSController(this)
@@ -140,12 +145,6 @@ class MainActivity : BaseActivity() {
             currentSituation = situation
             currentKeySentence = keySentence.ifBlank { null }
             viewModel.generateConversation(situation, currentKeySentence)
-        }
-
-        // History button
-        binding.historyButton.setOnClickListener {
-            val intent = Intent(this, HistoryActivity::class.java)
-            startActivity(intent)
         }
 
         // Clear button
@@ -436,6 +435,27 @@ class MainActivity : BaseActivity() {
             language = generationLanguage,
             onComplete = { }
         )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_history -> {
+                val intent = Intent(this, HistoryActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onDestroy() {

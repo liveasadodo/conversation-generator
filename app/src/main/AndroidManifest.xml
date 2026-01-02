@@ -36,6 +36,11 @@
             android:name=".ConversationDetailActivity"
             android:exported="false"
             android:parentActivityName=".HistoryActivity" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
