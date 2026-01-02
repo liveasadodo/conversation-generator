@@ -29,6 +29,103 @@ object PromptTemplates {
         }
     }
 
+    /**
+     * Builds the introduction section of the prompt
+     */
+    private fun buildIntroduction(
+        generationLanguage: Language,
+        hasKeySentence: Boolean
+    ): String {
+        val generationLangName = generationLanguage.displayName
+        return if (hasKeySentence) {
+            "Please generate a natural $generationLangName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence."
+        } else {
+            "Please generate a natural $generationLangName conversation suitable for the following situation."
+        }
+    }
+
+    /**
+     * Builds the requirements section of the prompt
+     */
+    private fun buildRequirements(
+        conversationLength: Int,
+        formalityInstruction: String,
+        hasKeySentence: Boolean
+    ): String {
+        val baseRequirements = """
+            Requirements:
+            - Conversation should consist of exactly $conversationLength exchanges (turns)
+            - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
+            $formalityInstruction
+        """.trimIndent()
+
+        return if (hasKeySentence) {
+            baseRequirements + "\n- IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues"
+        } else {
+            baseRequirements
+        }
+    }
+
+    /**
+     * Builds the situation section of the prompt
+     */
+    private fun buildSituation(
+        situation: String,
+        keySentence: String?
+    ): String {
+        return if (!keySentence.isNullOrBlank()) {
+            """
+                Situation: $situation
+                Key Sentence: $keySentence
+            """.trimIndent()
+        } else {
+            "Situation: $situation"
+        }
+    }
+
+    /**
+     * Builds the JSON structure specification
+     */
+    private fun buildJsonStructure(
+        generationLanguage: Language,
+        translationLanguage: Language?
+    ): String {
+        val generationLangName = generationLanguage.displayName
+        return if (translationLanguage != null) {
+            val translationLangName = translationLanguage.displayName
+            """
+                IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
+                {
+                  "title": "Conversation title in $generationLangName",
+                  "titleTranslation": "$translationLangName translation of title",
+                  "lines": [
+                    {
+                      "speaker": "Speaker name in $generationLangName",
+                      "speakerTranslation": "$translationLangName translation of speaker name",
+                      "text": "Dialogue text in $generationLangName",
+                      "translation": "$translationLangName translation of dialogue"
+                    }
+                  ]
+                }
+            """.trimIndent()
+        } else {
+            """
+                IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
+                {
+                  "title": "Conversation title in $generationLangName",
+                  "titleTranslation": null,
+                  "lines": [
+                    {
+                      "speaker": "Speaker name in $generationLangName",
+                      "speakerTranslation": null,
+                      "text": "Dialogue text in $generationLangName",
+                      "translation": null
+                    }
+                  ]
+                }
+            """.trimIndent()
+        }
+    }
 
     fun generateConversationPrompt(
         situation: String,
@@ -38,170 +135,27 @@ object PromptTemplates {
         formality: Formality = Formality.CASUAL,
         conversationLength: Int = 3
     ): String {
-        val languageName = generationLanguage.displayName
-        val includeTranslation = interfaceLanguage != null && interfaceLanguage != generationLanguage
+        val translationLanguage = if (interfaceLanguage != null && interfaceLanguage != generationLanguage) {
+            interfaceLanguage
+        } else {
+            null
+        }
         val hasKeySentence = !keySentence.isNullOrBlank()
         val formalityInstruction = getFormalityInstruction(formality, generationLanguage)
 
-        return when {
-            includeTranslation && hasKeySentence -> {
-                """
-                    Please generate a natural $languageName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence.
-
-                    Requirements:
-                    - Conversation should consist of exactly $conversationLength exchanges (turns)
-                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
-                    $formalityInstruction
-                    - Clearly distinguish each speaker's dialogue
-                    - Include appropriate greetings and closing
-                    - IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues
-
-                    Situation: $situation
-                    Key Sentence: $keySentence
-
-                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
-                    {
-                      "title": "Conversation title in $languageName",
-                      "titleTranslation": "${interfaceLanguage!!.displayName} translation of title",
-                      "lines": [
-                        {
-                          "speaker": "Speaker name in $languageName",
-                          "speakerTranslation": "${interfaceLanguage.displayName} translation of speaker name",
-                          "text": "Dialogue text in $languageName",
-                          "translation": "${interfaceLanguage.displayName} translation of dialogue"
-                        }
-                      ]
-                    }
-                """.trimIndent()
-            }
-            includeTranslation -> {
-                """
-                    Please generate a natural $languageName conversation suitable for the following situation.
-
-                    Requirements:
-                    - Conversation should consist of exactly $conversationLength exchanges (turns)
-                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
-                    $formalityInstruction
-                    - Clearly distinguish each speaker's dialogue
-                    - Include appropriate greetings and closing
-
-                    Situation: $situation
-
-                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
-                    {
-                      "title": "Conversation title in $languageName",
-                      "titleTranslation": "${interfaceLanguage!!.displayName} translation of title",
-                      "lines": [
-                        {
-                          "speaker": "Speaker name in $languageName",
-                          "speakerTranslation": "${interfaceLanguage.displayName} translation of speaker name",
-                          "text": "Dialogue text in $languageName",
-                          "translation": "${interfaceLanguage.displayName} translation of dialogue"
-                        }
-                      ]
-                    }
-                """.trimIndent()
-            }
-            hasKeySentence -> {
-                """
-                    Please generate a natural $languageName conversation suitable for the following situation. The conversation MUST naturally include the following key sentence.
-
-                    Requirements:
-                    - Conversation should consist of exactly $conversationLength exchanges (turns)
-                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
-                    $formalityInstruction
-                    - Clearly distinguish each speaker's dialogue
-                    - Include appropriate greetings and closing
-                    - IMPORTANT: The key sentence must appear naturally within one of the speaker's dialogues
-
-                    Situation: $situation
-                    Key Sentence: $keySentence
-
-                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
-                    {
-                      "title": "Conversation title in $languageName",
-                      "titleTranslation": null,
-                      "lines": [
-                        {
-                          "speaker": "Speaker name in $languageName",
-                          "speakerTranslation": null,
-                          "text": "Dialogue text in $languageName",
-                          "translation": null
-                        }
-                      ]
-                    }
-                """.trimIndent()
-            }
-            else -> {
-                """
-                    Please generate a natural $languageName conversation suitable for the following situation.
-
-                    Requirements:
-                    - Conversation should consist of exactly $conversationLength exchanges (turns)
-                    - Note: $conversationLength exchanges means $conversationLength pairs of Speaker A and Speaker B dialogue
-                    $formalityInstruction
-                    - Clearly distinguish each speaker's dialogue
-                    - Include appropriate greetings and closing
-
-                    Situation: $situation
-
-                    IMPORTANT: Respond with ONLY valid JSON (no markdown formatting, no code blocks). Use this exact structure:
-                    {
-                      "title": "Conversation title in $languageName",
-                      "titleTranslation": null,
-                      "lines": [
-                        {
-                          "speaker": "Speaker name in $languageName",
-                          "speakerTranslation": null,
-                          "text": "Dialogue text in $languageName",
-                          "translation": null
-                        }
-                      ]
-                    }
-                """.trimIndent()
-            }
-        }
-    }
-
-    fun generateWithDifficulty(situation: String, difficulty: String): String {
-        val vocabularyLevel = when (difficulty) {
-            "beginner" -> "Use simple, everyday vocabulary (A1-A2 level)"
-            "intermediate" -> "Use common vocabulary and some idiomatic expressions (B1-B2 level)"
-            "advanced" -> "Use sophisticated vocabulary and natural idioms (C1-C2 level)"
-            else -> "Use natural, practical expressions"
-        }
+        val introduction = buildIntroduction(generationLanguage, hasKeySentence)
+        val requirements = buildRequirements(conversationLength, formalityInstruction, hasKeySentence)
+        val situationSection = buildSituation(situation, keySentence)
+        val jsonStructure = buildJsonStructure(generationLanguage, translationLanguage)
 
         return """
-            Please generate a natural English conversation suitable for the following situation.
+            $introduction
 
-            Requirements:
-            - Conversation should consist of 2-3 exchanges
-            - $vocabularyLevel
-            - Clearly distinguish each speaker's dialogue
-            - Include appropriate greetings and closing
+            $requirements
 
-            Situation: $situation
-        """.trimIndent()
-    }
+            $situationSection
 
-    fun generateWithLength(situation: String, length: String): String {
-        val turnCount = when (length) {
-            "short" -> "1-2 exchanges"
-            "medium" -> "2-3 exchanges"
-            "long" -> "4-5 exchanges"
-            else -> "2-3 exchanges"
-        }
-
-        return """
-            Please generate a natural English conversation suitable for the following situation.
-
-            Requirements:
-            - Conversation should consist of $turnCount
-            - Use practical and natural expressions
-            - Clearly distinguish each speaker's dialogue
-            - Include appropriate greetings and closing
-
-            Situation: $situation
+            $jsonStructure
         """.trimIndent()
     }
 }
