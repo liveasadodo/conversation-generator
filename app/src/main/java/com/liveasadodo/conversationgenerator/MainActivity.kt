@@ -25,6 +25,7 @@ import com.liveasadodo.conversationgenerator.ui.base.BaseActivity
 import com.liveasadodo.conversationgenerator.ui.viewmodel.MainViewModel
 import com.liveasadodo.conversationgenerator.ui.viewmodel.MainViewModelFactory
 import com.liveasadodo.conversationgenerator.util.ConversationParser
+import com.liveasadodo.conversationgenerator.util.ErrorHandler
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : BaseActivity() {
@@ -85,10 +86,10 @@ class MainActivity : BaseActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val apiKey = input.text.toString().trim()
                 if (apiKey.isEmpty()) {
-                    Toast.makeText(this, "API key is required", Toast.LENGTH_SHORT).show()
+                    ErrorHandler.showError(this, "API key is required", isLongDuration = false)
                     finish()
                 } else if (apiKey.length < 20) {
-                    Toast.makeText(this, "API key seems too short. Please check and try again.", Toast.LENGTH_LONG).show()
+                    ErrorHandler.showError(this, "API key seems too short. Please check and try again.")
                     // Show dialog again
                     showApiKeyDialog()
                 } else {
@@ -345,18 +346,14 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showError(message: String) {
-        // If error is related to API key, offer to reset it
-        if (message.contains("API key", ignoreCase = true)) {
-            MaterialAlertDialogBuilder(this)
-                .setTitle("API Key Error")
-                .setMessage(message + "\n\nWould you like to enter a new API key?")
-                .setPositiveButton("Yes") { _, _ ->
-                    resetApiKey()
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
+        if (ErrorHandler.isApiKeyError(message)) {
+            ErrorHandler.showApiKeyError(
+                context = this,
+                message = message,
+                onReset = { resetApiKey() }
+            )
         } else {
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            ErrorHandler.showError(this, message)
         }
     }
 
@@ -380,7 +377,7 @@ class MainActivity : BaseActivity() {
 
         val clip = ClipData.newPlainText("Conversation", textToCopy)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, R.string.message_copied, Toast.LENGTH_SHORT).show()
+        ErrorHandler.showSuccess(this, getString(R.string.message_copied))
     }
 
     private fun shareConversation(text: String) {

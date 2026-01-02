@@ -15,6 +15,7 @@ import com.liveasadodo.conversationgenerator.ui.base.BaseActivity
 import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailViewModel
 import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailViewModelFactory
 import com.liveasadodo.conversationgenerator.ui.viewmodel.ConversationDetailState
+import com.liveasadodo.conversationgenerator.util.ErrorHandler
 
 class ConversationDetailActivity : BaseActivity() {
 
@@ -56,11 +57,11 @@ class ConversationDetailActivity : BaseActivity() {
                     displayConversationDetails(state.conversation)
                 }
                 is ConversationDetailState.NotFound -> {
-                    Toast.makeText(this, "Conversation not found", Toast.LENGTH_SHORT).show()
+                    ErrorHandler.showError(this, "Conversation not found", isLongDuration = false)
                     finish()
                 }
                 is ConversationDetailState.Error -> {
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                    ErrorHandler.showError(this, state.message, isLongDuration = false)
                     finish()
                 }
             }
@@ -133,7 +134,7 @@ class ConversationDetailActivity : BaseActivity() {
 
         val clip = ClipData.newPlainText("Conversation", textToCopy)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, R.string.message_copied, Toast.LENGTH_SHORT).show()
+        ErrorHandler.showSuccess(this, getString(R.string.message_copied))
     }
 
     private fun shareConversation() {
