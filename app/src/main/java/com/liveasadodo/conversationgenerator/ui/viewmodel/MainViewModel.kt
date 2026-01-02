@@ -55,29 +55,49 @@ class MainViewModel(
         keySentence: String? = null,
         difficulty: String = "intermediate"
     ) {
-        // Validate input
-        when (val validationResult = InputValidator.validateSituation(situation)) {
-            is ValidationResult.Valid -> {
-                _validationError.value = null
-                _conversationState.value = ApiResult.Loading
+        // Validate situation
+        val situationValidation = InputValidator.validateSituation(situation)
+        if (situationValidation is ValidationResult.Error) {
+            _validationError.value = situationValidation.message
+            _conversationState.value = ApiResult.Error(0, situationValidation.message)
+            return
+        }
 
-                viewModelScope.launch {
-                    val result = repository.generateConversation(
-                        situation = validationResult.input,
-                        keySentence = keySentence,
-                        generationLanguage = _generationLanguage.value ?: Language.ENGLISH,
-                        interfaceLanguage = _interfaceLanguage.value,
-                        formality = _formality.value ?: Formality.CASUAL,
-                        conversationLength = _conversationLength.value ?: 3,
-                        difficulty = difficulty
-                    )
-                    _conversationState.value = result
-                }
-            }
-            is ValidationResult.Error -> {
-                _validationError.value = validationResult.message
-                _conversationState.value = ApiResult.Error(0, validationResult.message)
-            }
+        // Validate key sentence
+        val keySentenceValidation = InputValidator.validateKeySentence(keySentence)
+        if (keySentenceValidation is ValidationResult.Error) {
+            _validationError.value = keySentenceValidation.message
+            _conversationState.value = ApiResult.Error(0, keySentenceValidation.message)
+            return
+        }
+
+        // Validate conversation length
+        val currentLength = _conversationLength.value ?: 3
+        val lengthValidation = InputValidator.validateConversationLength(currentLength)
+        if (lengthValidation is ValidationResult.Error) {
+            _validationError.value = lengthValidation.message
+            _conversationState.value = ApiResult.Error(0, lengthValidation.message)
+            return
+        }
+
+        // All validations passed
+        _validationError.value = null
+        _conversationState.value = ApiResult.Loading
+
+        viewModelScope.launch {
+            val validatedSituation = (situationValidation as ValidationResult.Valid).input
+            val validatedKeySentence = (keySentenceValidation as ValidationResult.Valid).input.ifBlank { null }
+
+            val result = repository.generateConversation(
+                situation = validatedSituation,
+                keySentence = validatedKeySentence,
+                generationLanguage = _generationLanguage.value ?: Language.ENGLISH,
+                interfaceLanguage = _interfaceLanguage.value,
+                formality = _formality.value ?: Formality.CASUAL,
+                conversationLength = currentLength,
+                difficulty = difficulty
+            )
+            _conversationState.value = result
         }
     }
 

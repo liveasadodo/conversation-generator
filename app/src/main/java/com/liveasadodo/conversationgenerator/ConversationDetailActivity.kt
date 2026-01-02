@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.liveasadodo.conversationgenerator.data.model.Formality
@@ -99,7 +98,6 @@ class ConversationDetailActivity : BaseActivity() {
     }
 
     private fun displayParsedConversation(parsed: com.liveasadodo.conversationgenerator.util.ParsedConversation) {
-        // Display conversation using helper
         com.liveasadodo.conversationgenerator.util.ConversationDisplayHelper.displayConversation(
             context = this,
             container = binding.conversationContainer,
