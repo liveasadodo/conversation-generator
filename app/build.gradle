@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.conversationgenerator'
+    namespace 'com.liveasadodo.conversationgenerator'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.conversationgenerator"
+        applicationId "com.liveasadodo.conversationgenerator"
         minSdk 24
         targetSdk 34
         versionCode 1
